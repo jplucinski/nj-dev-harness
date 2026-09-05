@@ -85,6 +85,7 @@ expected_archive_files() {
     scripts/preview.sh \
     scripts/project.sh \
     scripts/resume.sh \
+    scripts/search.sh \
     scripts/workflow.sh \
     scripts/worktree.sh \
     scripts/worktrees.sh; do

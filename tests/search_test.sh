@@ -77,6 +77,55 @@ test_workplace_project_dirs_dies_when_empty() {
   assert_contains "$output" "No project directories found in $workplace"
 }
 
+search_reload() {
+  DEV_WORKPLACE="$1" bash "$source_dir/scripts/search.sh" reload "$2"
+}
+
+test_reload_ignores_short_queries() {
+  local workplace="$test_root/short-query" output
+  mkdir -p "$workplace/payments"
+  printf 'OrderService\n' > "$workplace/payments/A.java"
+  output="$(search_reload "$workplace" '')"
+  assert_equals "$output" ''
+  output="$(search_reload "$workplace" 'O')"
+  assert_equals "$output" ''
+}
+
+test_reload_finds_a_sibling_project_not_just_cwd() {
+  local workplace="$test_root/function action place" output
+  mkdir -p "$workplace/notes vault" "$workplace/payments/src"
+  printf 'nothing\n' > "$workplace/notes vault/readme.md"
+  printf 'public class OrderService {}\n' > "$workplace/payments/src/OrderService.java"
+  output="$(
+    cd "$workplace/notes vault"
+    search_reload "$workplace" 'OrderService'
+  )"
+  assert_contains "$output" 'OrderService.java'
+  assert_contains "$output" 'OrderService'
+  [[ "$output" == *payments* ]] || fail 'reload did not search the sibling payments project'
+}
+
+test_reload_respects_child_gitignore() {
+  local workplace="$test_root/ignore-child" output
+  create_repo "$workplace/payments"
+  printf 'secret-token\n' > "$workplace/payments/ignored.txt"
+  printf 'ignored.txt\n' > "$workplace/payments/.gitignore"
+  git -C "$workplace/payments" add .gitignore
+  git -C "$workplace/payments" commit -q -m 'Ignore ignored.txt'
+  printf 'visible-token\n' > "$workplace/payments/visible.txt"
+  output="$(search_reload "$workplace" 'token')"
+  assert_contains "$output" 'visible.txt'
+  [[ "$output" != *ignored.txt* ]] || fail 'rg searched a gitignored file'
+}
+
+test_reload_searches_a_non_git_child() {
+  local workplace="$test_root/plain-child" output
+  mkdir -p "$workplace/scratch"
+  printf 'OrderService\n' > "$workplace/scratch/notes.md"
+  output="$(search_reload "$workplace" 'OrderService')"
+  assert_contains "$output" 'notes.md'
+}
+
 test_workplace_root_requires_config
 printf 'PASS: workplace_root requires DEV_WORKPLACE\n'
 test_workplace_root_requires_a_directory
@@ -85,3 +134,11 @@ test_workplace_project_dirs_lists_sorted_children_including_spaces
 printf 'PASS: workplace_project_dirs lists sorted children\n'
 test_workplace_project_dirs_dies_when_empty
 printf 'PASS: workplace_project_dirs dies when empty\n'
+test_reload_ignores_short_queries
+printf 'PASS: reload ignores short queries\n'
+test_reload_finds_a_sibling_project_not_just_cwd
+printf 'PASS: reload finds a sibling project\n'
+test_reload_respects_child_gitignore
+printf 'PASS: reload respects child gitignore\n'
+test_reload_searches_a_non_git_child
+printf 'PASS: reload searches a non-git child\n'

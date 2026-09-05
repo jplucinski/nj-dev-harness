@@ -48,6 +48,7 @@ for suite in \
   git_isolation_test.sh \
   review_fixes_test.sh \
   resume_test.sh \
+  search_test.sh \
   workflow_utils_test.sh \
   docker_demo_test.sh \
   install_test.sh \

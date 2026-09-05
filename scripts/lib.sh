@@ -74,6 +74,25 @@ to_shell_path() {
   esac
 }
 
+workplace_root() {
+  local workplace="${DEV_WORKPLACE:-}"
+  [ -n "$workplace" ] || die "Set DEV_WORKPLACE in ~/.config/dev-harness/config.env."
+  workplace="$(to_shell_path "$workplace")"
+  [ -d "$workplace" ] || die "DEV_WORKPLACE does not exist: $workplace"
+  (cd "$workplace" && pwd -P)
+}
+
+workplace_project_dirs() {
+  local workplace path found=false
+  workplace="$(workplace_root)"
+  while IFS= read -r path; do
+    [ -n "$path" ] || continue
+    (cd "$path" && pwd -P)
+    found=true
+  done < <(find "$workplace" -mindepth 1 -maxdepth 1 -type d -print | LC_ALL=C sort)
+  [ "$found" = true ] || die "No project directories found in $workplace"
+}
+
 repo_root() {
   local root
   root="$(git rev-parse --show-toplevel 2>/dev/null)" || die "This command must run inside a Git repository."

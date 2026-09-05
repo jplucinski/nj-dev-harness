@@ -210,6 +210,184 @@ test_search_preview_reads_the_workplace_file() {
   assert_contains "$output" 'OrderService'
 }
 
+install_fake_grepai() {
+  local bin="$1" log="$2" behavior="${3:-full}"
+  mkdir -p "$bin"
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    "log='$log'" \
+    "behavior='$behavior'" \
+    'printf "%s\n" "$*" >> "$log"' \
+    'case "$1" in' \
+    '  init)' \
+    '    mkdir -p .grepai' \
+    '    : > .grepai/config.yaml' \
+    '    exit 0' \
+    '    ;;' \
+    '  index)' \
+    '    if [ "${2:-}" = --help ]; then' \
+    '      [ "$behavior" = has-index ] || exit 1' \
+    '      exit 0' \
+    '    fi' \
+    '    mkdir -p .grepai' \
+    '    printf "indexed\n" > .grepai/index.gob' \
+    '    exit 0' \
+    '    ;;' \
+    '  watch)' \
+    '    case "${2:-}" in' \
+    '      --status) [ "$behavior" = watch-running ] && exit 0; exit 1 ;;' \
+    '      --background) mkdir -p .grepai; printf "watched\n" > .grepai/index.gob; exit 0 ;;' \
+    '      *) exit 1 ;;' \
+    '    esac' \
+    '    ;;' \
+    '  search)' \
+    '    cat <<'\''EOF'\''' \
+    '{' \
+    '  "query": "authentication",' \
+    '  "results": [' \
+    '    {' \
+    '      "score": 0.92,' \
+    '      "file": "payments/src/Auth.java",' \
+    '      "start_line": 15,' \
+    '      "end_line": 45,' \
+    '      "content": "class Auth {"' \
+    '    }' \
+    '  ],' \
+    '  "total": 1' \
+    '}' \
+    'EOF' \
+    '    ;;' \
+    '  *) exit 1 ;;' \
+    'esac' \
+    > "$bin/grepai"
+  chmod +x "$bin/grepai"
+}
+
+prepare_workplace() {
+  local workplace="$1"
+  mkdir -p "$workplace/payments/src"
+  printf 'class Auth {}\n' > "$workplace/payments/src/Auth.java"
+}
+
+test_index_requires_grepai() {
+  local workplace="$test_root/index-missing-grepai" fake_bin output status=0
+  prepare_workplace "$workplace"
+  fake_bin="$workplace/bin"
+  mkdir -p "$fake_bin"
+  output="$(
+    PATH="$fake_bin:/usr/bin:/bin" DEV_WORKPLACE="$workplace" \
+      bash "$source_dir/scripts/search.sh" index 2>&1
+  )" || status=$?
+  [ "$status" -ne 0 ] || fail 'index accepted a PATH without grepai'
+  assert_contains "$output" 'Missing command: grepai'
+}
+
+test_index_inits_once_then_runs_index_subcommand() {
+  local workplace="$test_root/index-has-index" fake_bin log
+  prepare_workplace "$workplace"
+  fake_bin="$workplace/bin"
+  log="$workplace/grepai.log"
+  install_fake_grepai "$fake_bin" "$log" has-index
+  PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" \
+    bash "$source_dir/scripts/search.sh" index
+  assert_contains "$(cat "$log")" 'init --yes --provider ollama --backend gob'
+  [ -f "$workplace/.grepai/config.yaml" ] || fail 'index did not create config.yaml'
+  [ -f "$workplace/.grepai/index.gob" ] || fail 'index did not create index.gob'
+  : > "$log"
+  PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" \
+    bash "$source_dir/scripts/search.sh" index
+  if grep -q 'init ' "$log"; then
+    fail 'index ran init again when config.yaml already existed'
+  fi
+  assert_contains "$(cat "$log")" 'index'
+}
+
+test_index_falls_back_to_watch_background() {
+  local workplace="$test_root/index-watch" fake_bin log
+  prepare_workplace "$workplace"
+  fake_bin="$workplace/bin"
+  log="$workplace/grepai.log"
+  install_fake_grepai "$fake_bin" "$log" watch-only
+  PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" \
+    bash "$source_dir/scripts/search.sh" index
+  assert_contains "$(cat "$log")" 'watch --background'
+}
+
+test_index_skips_watch_when_already_running() {
+  local workplace="$test_root/index-running" fake_bin log
+  prepare_workplace "$workplace"
+  mkdir -p "$workplace/.grepai"
+  : > "$workplace/.grepai/config.yaml"
+  printf 'seed\n' > "$workplace/.grepai/index.gob"
+  fake_bin="$workplace/bin"
+  log="$workplace/grepai.log"
+  install_fake_grepai "$fake_bin" "$log" watch-running
+  PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" \
+    bash "$source_dir/scripts/search.sh" index
+  assert_contains "$(cat "$log")" 'watch --status'
+  if grep -q 'watch --background' "$log"; then
+    fail 'index started a second watcher'
+  fi
+}
+
+test_semantic_requires_index() {
+  local workplace="$test_root/semantic-no-index" fake_bin output status=0
+  prepare_workplace "$workplace"
+  fake_bin="$workplace/bin"
+  log="$workplace/grepai.log"
+  install_fake_grepai "$fake_bin" "$log" has-index
+  output="$(
+    PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" \
+      bash "$source_dir/scripts/search.sh" semantic 2>&1
+  )" || status=$?
+  [ "$status" -ne 0 ] || fail 'semantic ran without an index'
+  assert_contains "$output" 'gtask index'
+}
+
+test_semantic_opens_a_formatted_match() {
+  local workplace="$test_root/semantic-open" fake_bin editor_record output status=0
+  prepare_workplace "$workplace"
+  mkdir -p "$workplace/.grepai"
+  : > "$workplace/.grepai/config.yaml"
+  printf 'seed\n' > "$workplace/.grepai/index.gob"
+  fake_bin="$workplace/bin"
+  install_fake_grepai "$fake_bin" "$workplace/grepai.log" has-index
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'printf "\n%s\n" "payments/src/Auth.java:15:1:0.92 class Auth {"' \
+    > "$fake_bin/fzf"
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'printf "%s\n" "$*" > "$EDITOR_RECORD"' \
+    > "$fake_bin/code"
+  chmod +x "$fake_bin/fzf" "$fake_bin/code"
+  output="$(
+    PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_EDITOR=code \
+    EDITOR_RECORD="$workplace/editor-argument" DEV_HARNESS_INPUT='authentication' \
+      bash "$source_dir/scripts/search.sh" semantic
+  )" || status=$?
+  [ "$status" -eq 0 ] || fail "semantic search failed: $output"
+  assert_contains "$(cat "$workplace/editor-argument")" "--goto"
+  assert_contains "$(cat "$workplace/editor-argument")" "payments/src/Auth.java:15:1"
+}
+
+test_semantic_empty_query_exits_without_search() {
+  local workplace="$test_root/semantic-empty" fake_bin log status=0
+  prepare_workplace "$workplace"
+  mkdir -p "$workplace/.grepai"
+  : > "$workplace/.grepai/config.yaml"
+  printf 'seed\n' > "$workplace/.grepai/index.gob"
+  fake_bin="$workplace/bin"
+  log="$workplace/grepai.log"
+  install_fake_grepai "$fake_bin" "$log" has-index
+  PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_HARNESS_INPUT= \
+    bash "$source_dir/scripts/search.sh" semantic </dev/null || status=$?
+  [ "$status" -eq 0 ] || fail 'empty semantic query should exit 0'
+  if grep -q 'search' "$log" 2>/dev/null; then
+    fail 'semantic searched with an empty query'
+  fi
+}
+
 test_workplace_root_requires_config
 printf 'PASS: workplace_root requires DEV_WORKPLACE\n'
 test_workplace_root_requires_a_directory
@@ -236,3 +414,17 @@ test_palette_hides_search_without_workplace
 printf 'PASS: palette hides search without workplace\n'
 test_search_preview_reads_the_workplace_file
 printf 'PASS: search preview reads the workplace file\n'
+test_index_requires_grepai
+printf 'PASS: index requires grepai\n'
+test_index_inits_once_then_runs_index_subcommand
+printf 'PASS: index inits once then runs index\n'
+test_index_falls_back_to_watch_background
+printf 'PASS: index falls back to watch --background\n'
+test_index_skips_watch_when_already_running
+printf 'PASS: index skips watch when already running\n'
+test_semantic_requires_index
+printf 'PASS: semantic requires gtask index\n'
+test_semantic_opens_a_formatted_match
+printf 'PASS: semantic opens a formatted match\n'
+test_semantic_empty_query_exits_without_search
+printf 'PASS: empty semantic query exits without search\n'

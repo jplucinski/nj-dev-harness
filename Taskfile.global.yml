@@ -111,6 +111,21 @@ tasks:
     cmds:
       - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/search.sh" live
 
+  semantic:
+    aliases: [sem]
+    desc: Search workplace code by meaning and open a selected match
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/search.sh" semantic
+
+  index:
+    desc: Initialize and build the workplace semantic index
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/search.sh" index
+
   wt:
     aliases: [worktree]
     desc: Create a timestamped Git worktree

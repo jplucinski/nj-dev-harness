@@ -32,6 +32,8 @@ show_help() {
     '  gtask open            select a file below the current directory' \
     '  gtask changed         select a changed file' \
     '  gtask search -- TEXT  search workplace contents' \
+    '  gtask semantic -- TEXT  search workplace code by meaning' \
+    '  gtask index           initialize the workplace semantic index' \
     '' \
     'Do' \
     '  gtask wt -- BRANCH    create a timestamped worktree' \
@@ -110,6 +112,7 @@ show_aliases() {
     '  gtask o          gtask open' \
     '  gtask oc         gtask changed' \
     '  gtask s          gtask search' \
+    '  gtask sem        gtask semantic' \
     '  gtask worktree   gtask wt' \
     '  gtask wts        gtask worktrees' \
     '  gtask ctx        gtask context' \

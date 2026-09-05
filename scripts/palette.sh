@@ -33,6 +33,8 @@ if [ -n "${DEV_WORKPLACE:-}" ] && [ -d "$(to_shell_path "$DEV_WORKPLACE")" ]; th
   add_row resume 'return to recent project or worktree context' 'wznow wróć continue recent context projekt worktree'
   add_row dirty 'select a dirty repository or worktree' 'dirty brudne zmiany modified repo worktree'
   add_row search 'search workplace text' 'szukaj tekst grep rg s workplace'
+  add_row semantic 'search workplace code by meaning' 'semantic grepai szukaj znaczenie sem'
+  add_row index 'initialize workplace semantic index' 'grepai index ollama embeddings'
   resume_added=true
   dirty_added=true
 elif command -v atuin >/dev/null 2>&1; then

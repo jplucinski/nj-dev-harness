@@ -18,6 +18,12 @@ show_help() {
     '  gtask extend          how to add personal commands' \
     '  gtask --list          every global Task command' \
     '' \
+    'Console' \
+    '  .. / ... / ....     cd up 1 / 2 / 3 directories' \
+    '  -                   cd to the previous directory' \
+    '  ll / la             ls -lah / ls -A' \
+    '  mkcd DIR            mkdir -p DIR and cd into it' \
+    '' \
     'Find' \
     '  resume               select recent project or worktree and cd' \
     '  gtask resume         inspect recent contexts without changing this shell' \
@@ -74,8 +80,15 @@ show_aliases() {
     '  gd       git diff' \
     '  gds      git diff --staged' \
     '  gl       git log --oneline --graph --decorate -20' \
+    '  ..       cd ..' \
+    '  ...      cd ../..' \
+    '  ....     cd ../../..' \
+    '  -        cd -' \
+    '  ll       ls -lah' \
+    '  la       ls -A' \
     '' \
     'Shell functions' \
+    '  mkcd     mkdir -p DIR and cd into it' \
     '  gr       cd to the current repository root' \
     '  dirty    select a dirty repository/worktree and cd' \
     '  why      explain the current repository context' \

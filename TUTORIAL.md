@@ -540,6 +540,10 @@ gtask help               # mapa workflow
 gtask aliases            # aliasy
 resume                   # wróć do pracy
 gr                       # root bieżącego repozytorium
+.. / ... / ....          # poziom wyżej
+-                        # poprzedni katalog
+ll / la                  # listing
+mkcd DIR                 # utwórz katalog i wejdź
 dirty                    # przejdź do repozytorium ze zmianami
 why                      # wyjaśnij bieżący kontekst
 handoff --copy           # skopiuj bezpieczny kontekst przekazania

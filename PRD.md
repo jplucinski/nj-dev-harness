@@ -80,11 +80,18 @@ alias gs='git status -sb'
 alias gd='git diff'
 alias gds='git diff --staged'
 alias gl='git log --oneline --graph --decorate -20'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias -- -='cd -'
+alias ll='ls -lah'
+alias la='ls -A'
 ```
 
 Changing the parent shell directory requires a function:
 
 ```bash
+mkcd DIR # mkdir -p DIR and cd into it
 resume   # select a recent project or worktree and cd into it
 cproj    # select a project and cd into it
 oproj    # select a project and open it in DEV_EDITOR
@@ -139,6 +146,10 @@ Ctrl-R   review selected changes with AI
 | `oproj` | Select a project and open it with `DEV_EDITOR`. |
 | `cwork` | Change the current shell directory to `DEV_WORKPLACE`. |
 | `cvault` | Change the current shell directory to `DEV_OBSIDIAN_VAULT_PATH`. |
+| `..` / `...` / `....` | Change directory up 1, 2, or 3 levels. |
+| `-` | Change directory to the previous directory (`cd -`). |
+| `ll` / `la` | `ls -lah` / `ls -A`. |
+| `mkcd DIR` | Create `DIR` if needed and change the current shell directory into it. |
 | `resume` | Select a recent repository or linked worktree and change the current shell directory. |
 | `gtask resume` | Open the same resume picker from the global Task catalogue; Enter prints the selected path because a child process cannot change its parent shell. |
 | `gtask open` | Recursively select a file below the current directory using `rg --files` and open it; Git is not required. |

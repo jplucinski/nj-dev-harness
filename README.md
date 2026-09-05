@@ -150,6 +150,10 @@ cproj                         # select project and cd
 oproj                         # select project and open DEV_EDITOR
 cwork                         # cd to DEV_WORKPLACE
 cvault                        # cd to DEV_OBSIDIAN_VAULT_PATH
+.. / ... / ....               # cd up 1 / 2 / 3 directories
+-                             # cd to the previous directory
+ll / la                       # ls -lah / ls -A
+mkcd DIR                      # mkdir -p DIR and cd into it
 cwt                           # select worktree and cd
 owt                           # select worktree and open DEV_EDITOR
 resume                        # select recent project/worktree and cd

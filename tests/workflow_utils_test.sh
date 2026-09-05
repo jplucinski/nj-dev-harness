@@ -839,7 +839,7 @@ test_help_lists_every_workflow_fast_path_and_task_alias() {
   local help_output aliases_output
   help_output="$(bash "$source_dir/scripts/help.sh" help)"
   aliases_output="$(bash "$source_dir/scripts/help.sh" aliases)"
-  for command in gr dirty why handoff standup focus; do
+  for command in gr dirty why handoff standup focus mkcd; do
     assert_contains "$help_output" "$command"
     assert_contains "$aliases_output" "$command"
   done
@@ -848,6 +848,81 @@ test_help_lists_every_workflow_fast_path_and_task_alias() {
   assert_contains "$aliases_output" 'gtask hf'
   assert_contains "$aliases_output" 'gtask stp'
   assert_contains "$aliases_output" 'gtask foc'
+  assert_contains "$aliases_output" '..'
+  assert_contains "$aliases_output" 'cd ../..'
+  assert_contains "$aliases_output" 'll'
+  assert_contains "$aliases_output" 'ls -lah'
+  assert_contains "$aliases_output" 'la'
+  assert_contains "$aliases_output" 'ls -A'
+}
+
+test_console_navigation_aliases_change_directory() {
+  local base="$test_root/console nav/root" output
+  mkdir -p "$base/one/two/three"
+
+  output="$(
+    NAV_ROOT="$(cd "$base" && pwd -P)" \
+    NAV_ONE="$(cd "$base/one" && pwd -P)" \
+    NAV_TWO="$(cd "$base/one/two" && pwd -P)" \
+    NAV_THREE="$(cd "$base/one/two/three" && pwd -P)" \
+    DEV_HARNESS_HOME="$source_dir" bash --noprofile --norc -c '
+      shopt -s expand_aliases
+      source "$DEV_HARNESS_HOME/shell/dev-harness.bash"
+      cd "$NAV_THREE"
+      ..
+      printf "up1=%s\n" "$(pwd -P)"
+      cd "$NAV_THREE"
+      ...
+      printf "up2=%s\n" "$(pwd -P)"
+      cd "$NAV_THREE"
+      ....
+      printf "up3=%s\n" "$(pwd -P)"
+      cd "$NAV_TWO"
+      cd "$NAV_THREE"
+      - >/dev/null
+      printf "back=%s\n" "$(pwd -P)"
+      printf "ll=%s\n" "$(alias ll)"
+      printf "la=%s\n" "$(alias la)"
+    '
+  )"
+
+  assert_contains "$output" "up1=$(cd "$base/one/two" && pwd -P)"
+  assert_contains "$output" "up2=$(cd "$base/one" && pwd -P)"
+  assert_contains "$output" "up3=$(cd "$base" && pwd -P)"
+  assert_contains "$output" "back=$(cd "$base/one/two" && pwd -P)"
+  assert_contains "$output" "ll='ls -lah'"
+  assert_contains "$output" "la='ls -A'"
+}
+
+test_mkcd_creates_and_enters_directory_with_spaces() {
+  local base="$test_root/mkcd nav/parent" target output
+  mkdir -p "$base"
+  target="$(cd "$base" && pwd -P)/new dir/nested"
+
+  output="$(
+    cd "$base"
+    DEV_HARNESS_HOME="$source_dir" bash --noprofile --norc -c '
+      source "$DEV_HARNESS_HOME/shell/dev-harness.bash"
+      mkcd "new dir/nested"
+      printf "cwd=%s\n" "$(pwd -P)"
+    '
+  )"
+  assert_contains "$output" "cwd=$target"
+  [ -d "$target" ] || fail "mkcd did not create $target"
+
+  output="$(
+    cd "$base"
+    DEV_HARNESS_HOME="$source_dir" bash --noprofile --norc -c '
+      source "$DEV_HARNESS_HOME/shell/dev-harness.bash"
+      if mkcd; then printf "status=0\n"; else printf "status=%s\n" "$?"; fi
+      if mkcd a b; then printf "multi=0\n"; else printf "multi=%s\n" "$?"; fi
+      pwd -P
+    ' 2>&1
+  )"
+  assert_contains "$output" 'usage: mkcd DIR'
+  assert_contains "$output" 'status=1'
+  assert_contains "$output" 'multi=1'
+  assert_contains "$output" "$(cd "$base" && pwd -P)"
 }
 
 test_gr_changes_to_repository_root_with_spaces
@@ -896,3 +971,7 @@ test_palette_contextually_exposes_workflow_utilities
 printf 'PASS: palette exposes workflow utilities contextually\n'
 test_help_lists_every_workflow_fast_path_and_task_alias
 printf 'PASS: help lists workflow fast paths and Task aliases\n'
+test_console_navigation_aliases_change_directory
+printf 'PASS: console navigation aliases change directory\n'
+test_mkcd_creates_and_enters_directory_with_spaces
+printf 'PASS: mkcd creates and enters a directory with spaces\n'

@@ -48,6 +48,21 @@ alias gs='git status -sb'
 alias gd='git diff'
 alias gds='git diff --staged'
 alias gl='git log --oneline --graph --decorate -20'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias -- -='cd -'
+alias ll='ls -lah'
+alias la='ls -A'
+
+unalias mkcd 2>/dev/null || true
+mkcd() {
+  [ "$#" -eq 1 ] && [ -n "$1" ] || {
+    printf 'usage: mkcd DIR\n' >&2
+    return 1
+  }
+  mkdir -p -- "$1" && cd -- "$1"
+}
 
 unalias gr 2>/dev/null || true
 gr() {

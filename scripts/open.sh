@@ -95,44 +95,5 @@ case "$mode" in
     parse_selection "$raw"
     handle_files
     ;;
-  search)
-    need git
-    root="$(repo_root)"
-    cd "$root"
-    query="${DEV_HARNESS_INPUT:-$*}"
-    if [ -z "$query" ]; then
-      read -r -p 'Search: ' query
-    fi
-    [ -n "$query" ] || exit 0
-    results="$(rg --line-number --column --no-heading --hidden -g '!.git' -- "$query" || true)"
-    [ -n "$results" ] || die "No matches for: $query"
-    raw="$(printf '%s\n' "$results" | fzf \
-      --multi \
-      --expect=ctrl-o,ctrl-y,ctrl-a,ctrl-r \
-      --header='Tab: multi · Enter/Ctrl-O: open · Ctrl-Y: copy · Ctrl-A: AI · Ctrl-R: review' \
-      --preview="bash \"$script_dir/preview.sh\" search {}" \
-      --preview-window='right,65%,wrap' \
-      --prompt='match > ')" || exit 0
-    parse_selection "$raw"
-    [ "${#selection_items[@]}" -gt 0 ] || exit 0
-    case "$selection_key" in
-      ctrl-y) printf '%s\n' "${selection_items[@]}" | clip_copy ;;
-      ctrl-a|ctrl-r)
-        files=()
-        for item in "${selection_items[@]}"; do
-          IFS=: read -r file _ <<<"$item"
-          files+=("$file")
-        done
-        if [ "$selection_key" = ctrl-a ]; then
-          bash "$script_dir/ai.sh" analyze-files "${files[@]}"
-        else
-          bash "$script_dir/ai.sh" review-files "${files[@]}"
-        fi
-        ;;
-      ''|ctrl-o)
-        for item in "${selection_items[@]}"; do open_match "$item"; done
-        ;;
-    esac
-    ;;
   *) die "Unknown open mode: $mode" ;;
 esac

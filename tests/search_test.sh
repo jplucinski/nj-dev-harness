@@ -126,6 +126,90 @@ test_reload_searches_a_non_git_child() {
   assert_contains "$output" 'notes.md'
 }
 
+test_live_search_opens_a_workplace_relative_match() {
+  local workplace="$test_root/live-open" fake_bin editor_record output status=0
+  fake_bin="$workplace/bin"
+  editor_record="$workplace/editor-argument"
+  mkdir -p "$workplace/payments/src" "$fake_bin"
+  printf 'public class OrderService {}\n' > "$workplace/payments/src/OrderService.java"
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'printf "\n%s\n" "payments/src/OrderService.java:1:8:OrderService"' \
+    > "$fake_bin/fzf"
+  printf '%s\n' \
+    '#!/usr/bin/env bash' \
+    'printf "%s\n" "$*" > "$EDITOR_RECORD"' \
+    > "$fake_bin/code"
+  chmod +x "$fake_bin/fzf" "$fake_bin/code"
+
+  output="$(
+    PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_EDITOR=code EDITOR_RECORD="$editor_record" \
+      bash "$source_dir/scripts/search.sh" live
+  )" || status=$?
+
+  [ "$status" -eq 0 ] || fail "live search failed: $output"
+  assert_contains "$(cat "$editor_record")" "--goto"
+  assert_contains "$(cat "$editor_record")" "payments/src/OrderService.java:1:8"
+}
+
+test_open_search_mode_is_removed() {
+  local fixture="$test_root/open-search-removed" fake_bin output status=0
+  fake_bin="$fixture/bin"
+  mkdir -p "$fake_bin"
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$fake_bin/fzf"
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$fake_bin/rg"
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$fake_bin/code"
+  chmod +x "$fake_bin/fzf" "$fake_bin/rg" "$fake_bin/code"
+  output="$(PATH="$fake_bin:$PATH" DEV_EDITOR=code bash "$source_dir/scripts/open.sh" search 2>&1)" || status=$?
+  [ "$status" -ne 0 ] || fail 'open.sh still accepts search'
+  assert_contains "$output" 'Unknown open mode: search'
+}
+
+test_palette_offers_search_outside_git_when_workplace_exists() {
+  local fixture="$test_root/palette-search" workplace bin palette_log
+  workplace="$fixture/workplace"
+  bin="$fixture/bin"
+  palette_log="$fixture/palette.tsv"
+  mkdir -p "$workplace/payments" "$bin"
+  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$PALETTE_LOG"' 'exit 130' > "$bin/fzf"
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$bin/task"
+  chmod +x "$bin/fzf" "$bin/task"
+  PATH="$bin:$(dirname "$(command -v git)"):/usr/bin:/bin" \
+    DEV_WORKPLACE="$workplace" PALETTE_LOG="$palette_log" \
+    bash "$source_dir/scripts/palette.sh" select || true
+  assert_contains "$(cat "$palette_log")" $'search\t'
+}
+
+test_palette_hides_search_without_workplace() {
+  local fixture="$test_root/palette-no-workplace" bin palette_log
+  bin="$fixture/bin"
+  palette_log="$fixture/palette.tsv"
+  mkdir -p "$bin" "$fixture/plain"
+  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$PALETTE_LOG"' 'exit 130' > "$bin/fzf"
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$bin/task"
+  chmod +x "$bin/fzf" "$bin/task"
+  (
+    cd "$fixture/plain"
+    PATH="$bin:$(dirname "$(command -v git)"):/usr/bin:/bin" \
+      DEV_WORKPLACE= PALETTE_LOG="$palette_log" \
+      bash "$source_dir/scripts/palette.sh" select || true
+  )
+  if grep -Eq '^search\t' "$palette_log"; then
+    fail 'search appeared without DEV_WORKPLACE'
+  fi
+}
+
+test_search_preview_reads_the_workplace_file() {
+  local workplace="$test_root/preview-workplace" output
+  mkdir -p "$workplace/payments"
+  printf 'alpha-line\nOrderService\n' > "$workplace/payments/A.java"
+  output="$(
+    DEV_WORKPLACE="$workplace" \
+      bash "$source_dir/scripts/preview.sh" search 'payments/A.java:2:1:OrderService'
+  )"
+  assert_contains "$output" 'OrderService'
+}
+
 test_workplace_root_requires_config
 printf 'PASS: workplace_root requires DEV_WORKPLACE\n'
 test_workplace_root_requires_a_directory
@@ -142,3 +226,13 @@ test_reload_respects_child_gitignore
 printf 'PASS: reload respects child gitignore\n'
 test_reload_searches_a_non_git_child
 printf 'PASS: reload searches a non-git child\n'
+test_live_search_opens_a_workplace_relative_match
+printf 'PASS: live search opens a workplace-relative match\n'
+test_open_search_mode_is_removed
+printf 'PASS: open.sh search mode is removed\n'
+test_palette_offers_search_outside_git_when_workplace_exists
+printf 'PASS: palette offers search outside Git when workplace exists\n'
+test_palette_hides_search_without_workplace
+printf 'PASS: palette hides search without workplace\n'
+test_search_preview_reads_the_workplace_file
+printf 'PASS: search preview reads the workplace file\n'

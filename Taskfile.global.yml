@@ -104,12 +104,12 @@ tasks:
 
   search:
     aliases: [s]
-    desc: Search repository text and open a selected match
+    desc: Search workplace text and open a selected match
     dir: '{{.USER_WORKING_DIR}}'
     env:
       DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
     cmds:
-      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/open.sh" search
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/search.sh" live
 
   wt:
     aliases: [worktree]

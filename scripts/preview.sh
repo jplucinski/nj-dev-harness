@@ -46,8 +46,12 @@ case "$mode" in
     ;;
   search)
     IFS=: read -r file line _ <<<"$target"
-    root="$(repo_root)"
-    show_file "$root/$file" "$line"
+    root="$(workplace_root)"
+    if is_sensitive_path "$file"; then
+      printf 'Sensitive file preview is hidden: %s\n' "$file"
+    else
+      show_file "$root/$file" "$line"
+    fi
     ;;
   project|worktree)
     path="$(to_shell_path "$target")"

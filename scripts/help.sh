@@ -31,7 +31,7 @@ show_help() {
     '  cwork / cvault        cd to the workplace / Obsidian vault path' \
     '  gtask open            select a file below the current directory' \
     '  gtask changed         select a changed file' \
-    '  gtask search -- TEXT  search repository contents' \
+    '  gtask search -- TEXT  search workplace contents' \
     '' \
     'Do' \
     '  gtask wt -- BRANCH    create a timestamped worktree' \

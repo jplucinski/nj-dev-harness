@@ -32,6 +32,7 @@ if [ -n "${DEV_WORKPLACE:-}" ] && [ -d "$(to_shell_path "$DEV_WORKPLACE")" ]; th
   add_row projects 'select a project path' 'projekt workspace workplace katalog'
   add_row resume 'return to recent project or worktree context' 'wznow wróć continue recent context projekt worktree'
   add_row dirty 'select a dirty repository or worktree' 'dirty brudne zmiany modified repo worktree'
+  add_row search 'search workplace text' 'szukaj tekst grep rg s workplace'
   resume_added=true
   dirty_added=true
 elif command -v atuin >/dev/null 2>&1; then
@@ -61,7 +62,6 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   add_row handoff 'print or copy secret-filtered handoff context' 'handoff przekazanie kontekst copy sesja'
   add_row standup 'build a local daily status' 'standup status dzienny daily podsumowanie'
   add_row changed "open changed files ($total)" 'zmiany changed diff oc'
-  add_row search 'search repository text' 'szukaj tekst grep rg s'
   add_row wt 'create a timestamped worktree' 'worktree branch gałąź'
   add_row worktrees "inspect or switch worktrees ($worktrees)" 'worktree lista przełącz wts'
   add_row changes 'summarize changes relative to the saved base' 'zmiany diff main summary'

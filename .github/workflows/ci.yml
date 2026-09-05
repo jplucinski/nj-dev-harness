@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime:
+    name: Runtime (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: stable
+      - name: Install Task v3.52.0
+        shell: bash
+        run: |
+          go install github.com/go-task/task/v3/cmd/task@v3.52.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+      - name: Install fzf on macOS
+        if: runner.os == 'macOS'
+        shell: bash
+        run: brew install fzf
+      - name: Install fzf on Windows
+        if: runner.os == 'Windows'
+        shell: bash
+        run: choco install fzf -y --no-progress
+      - name: Run complete verification
+        shell: bash
+        run: bash tests/run.sh
+      - name: Verify PowerShell installer syntax and help
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $errors = $null
+          [void][System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path '.\install.ps1'),
+            [ref]$null,
+            [ref]$errors
+          )
+          if ($errors.Count) { throw ($errors | Out-String) }
+          .\install.ps1 --help
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes shellcheck
+      - name: Check shell scripts
+        shell: bash
+        run: shellcheck install.sh scripts/*.sh shell/*.bash tests/*.sh tools/*.sh

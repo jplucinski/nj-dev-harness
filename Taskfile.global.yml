@@ -1,0 +1,235 @@
+version: '3'
+
+includes:
+  custom:
+    taskfile: ~/.config/dev-harness/Taskfile.yml
+    optional: true
+    flatten: true
+
+silent: true
+
+tasks:
+  default:
+    desc: Open the Dev Harness command palette
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/palette.sh"
+
+  help:
+    aliases: [h]
+    desc: Show the Dev Harness workflow cheat sheet
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/help.sh" help
+
+  aliases:
+    aliases: [aka]
+    desc: Show shell, function, and Task shortcuts
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/help.sh" aliases
+
+  extend:
+    aliases: [ext]
+    desc: Show how to extend Dev Harness
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/help.sh" extend
+
+  projects:
+    desc: Select and print a project path
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/project.sh" print
+
+  resume:
+    desc: Inspect and resume recent project or worktree context
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/resume.sh" manage
+
+  dirty:
+    desc: Select a dirty repository or worktree
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/dirty.sh" manage
+
+  why:
+    aliases: [y]
+    desc: Explain the current repository context
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/workflow.sh" why
+
+  handoff:
+    aliases: [hf]
+    desc: Print or copy secret-filtered repository handoff context
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/workflow.sh" handoff
+
+  standup:
+    aliases: [stp]
+    desc: Print, copy, or append a local daily status
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/workflow.sh" standup
+
+  focus:
+    aliases: [foc]
+    desc: Select an open TODO and print its project path
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/focus.sh" manage
+
+  open:
+    aliases: [o]
+    desc: Select and open a file below the current directory
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/open.sh" file
+
+  changed:
+    aliases: [oc]
+    desc: Select and open a changed file
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/open.sh" changed
+
+  search:
+    aliases: [s]
+    desc: Search repository text and open a selected match
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/open.sh" search
+
+  wt:
+    aliases: [worktree]
+    desc: Create a timestamped Git worktree
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/worktree.sh"
+
+  worktrees:
+    aliases: [wts]
+    desc: Inspect, open, or manage Git worktrees
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/worktrees.sh" manage
+
+  changes:
+    desc: Summarize changes relative to the worktree base or main
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/changes.sh" summary
+
+  context:
+    aliases: [ctx]
+    desc: Select, print, or copy bounded repository context for AI
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/ai.sh" context
+
+  ai:
+    desc: Start the configured interactive AI command
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/ai.sh" interactive
+
+  review:
+    aliases: [rv]
+    desc: Review selected changes with the configured AI command
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/ai.sh" review
+
+  logs:
+    desc: Select a running Docker container and follow logs
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/docker.sh" logs
+
+  shell:
+    desc: Select a running Docker container and open a shell
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/docker.sh" shell
+
+  note:
+    desc: Create and open a normal Obsidian note
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/obsidian.sh" note
+
+  day:
+    desc: Open today's note or append an entry
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/obsidian.sh" day
+
+  week:
+    desc: Open this week's note or append an entry
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/obsidian.sh" week
+
+  todo:
+    desc: List or create metadata-backed project TODO notes
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/obsidian.sh" todo
+
+  todos:
+    aliases: [tds]
+    desc: List metadata-backed TODO notes from the entire Obsidian vault
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/obsidian.sh" todos
+
+  done:
+    desc: Select and complete an open TODO note
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/obsidian.sh" done
+
+  reopen:
+    desc: Select and reopen a completed TODO note
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/obsidian.sh" reopen
+
+  doctor:
+    desc: Validate the Dev Harness installation
+    dir: '{{.USER_WORKING_DIR}}'
+    env:
+      DEV_HARNESS_INPUT: '{{.CLI_ARGS}}'
+    cmds:
+      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/doctor.sh"

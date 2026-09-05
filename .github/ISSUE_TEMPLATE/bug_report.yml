@@ -1,0 +1,80 @@
+name: Bug report
+description: Report a reproducible Dev Harness problem.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Redact secrets, credentials, private keys,
+        private source, and local paths before submitting this public issue.
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating system
+      description: Select the environment where the problem occurred.
+      options:
+        - macOS
+        - Windows
+        - Linux
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: shell
+    attributes:
+      label: Shell and version
+    validations:
+      required: true
+  - type: input
+    id: dev-harness-version
+    attributes:
+      label: Dev Harness version
+    validations:
+      required: true
+  - type: input
+    id: task-version
+    attributes:
+      label: Task version
+    validations:
+      required: true
+  - type: input
+    id: fzf-version
+    attributes:
+      label: fzf version
+    validations:
+      required: true
+  - type: input
+    id: git-version
+    attributes:
+      label: Git version
+    validations:
+      required: true
+  - type: textarea
+    id: doctor-output
+    attributes:
+      label: Sanitized gtask doctor output
+      description: Remove usernames, local paths, secrets, and credentials before pasting.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Give the smallest safe sequence that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true

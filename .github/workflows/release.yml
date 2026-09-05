@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions: {}
+
+jobs:
+  package:
+    name: Verify, package, and publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          go-version: stable
+      - name: Verify tag matches VERSION
+        shell: bash
+        run: |
+          expected_tag="v$(cat VERSION)"
+          if [ "$GITHUB_REF_NAME" != "$expected_tag" ]; then
+            printf 'Tag %s does not match VERSION (%s).\n' "$GITHUB_REF_NAME" "$expected_tag" >&2
+            exit 1
+          fi
+      - name: Install Task v3.52.0 and fzf
+        shell: bash
+        run: |
+          go install github.com/go-task/task/v3/cmd/task@v3.52.0
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+          sudo apt-get update
+          sudo apt-get install --yes fzf
+      - name: Run complete verification
+        shell: bash
+        run: bash tests/run.sh
+      - name: Build release assets
+        shell: bash
+        run: bash tools/package-release.sh
+      - name: Upload release assets as workflow artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: dev-harness-${{ github.ref_name }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/SHA256SUMS
+          if-no-files-found: error
+      - name: Publish GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            dist/*.tar.gz dist/*.zip dist/SHA256SUMS \
+            --generate-notes \
+            --verify-tag

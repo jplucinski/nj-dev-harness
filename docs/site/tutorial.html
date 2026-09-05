@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A guided Dev Harness tutorial: installation, projects, worktrees, AI review, Obsidian notes, and TODOs.">
+    <meta name="theme-color" content="#09110f">
+    <title>Dev Harness Tutorial</title>
+    <link rel="stylesheet" href="styles.css?v=0.3.0">
+    <script src="app.js?v=0.3.0" defer></script>
+  </head>
+  <body class="tutorial-page">
+    <a class="skip-link" href="#tutorial-content">Skip to tutorial</a>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Dev Harness home">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>
+        <span>dev harness</span>
+      </a>
+      <nav aria-label="Tutorial navigation">
+        <a href="index.html">Overview</a>
+        <a href="#install">Install</a>
+        <a href="#workflow">Daily flow</a>
+        <a href="README.md" data-repo-file="README.md">README</a>
+      </nav>
+    </header>
+
+    <main class="tutorial-shell">
+      <aside class="tutorial-nav" aria-label="Tutorial table of contents">
+        <p class="eyebrow">Tutorial</p>
+        <a href="#requirements">1. Requirements</a>
+        <a href="#demo">2. Docker demo</a>
+        <a href="#install">3. Install</a>
+        <a href="#configure">4. Configure</a>
+        <a href="#find">5. Find</a>
+        <a href="#do">6. Do</a>
+        <a href="#remember">7. Remember</a>
+        <a href="#todo">8. TODO</a>
+        <a href="#workflow">9. Daily flow</a>
+        <a href="#extend">10. Extend</a>
+        <a href="#troubleshooting">11. Troubleshooting</a>
+      </aside>
+
+      <article class="tutorial-content" id="tutorial-content">
+        <header class="tutorial-hero">
+          <p class="eyebrow">Installation and daily use</p>
+          <h1>Dev Harness tutorial</h1>
+          <p class="lede">Configure the global palette, repositories, worktrees, AI commands, and Obsidian.</p>
+          <div class="tutorial-meta">
+            <span>v0.3.0 preview</span>
+            <span>macOS + Windows Git Bash</span>
+            <span>11 sections</span>
+          </div>
+        </header>
+
+        <section class="tutorial-step" id="requirements">
+          <p class="step-number">01</p>
+          <div>
+            <h2>Install the four requirements</h2>
+            <p>Dev Harness requires:</p>
+            <ul class="check-list">
+              <li>Bash — system Bash on macOS or Git Bash on Windows</li>
+              <li><a href="https://taskfile.dev/">Task</a></li>
+              <li>Git</li>
+              <li><code>fzf</code></li>
+            </ul>
+            <p>Useful optional integrations include <code>rg</code>, VS Code, Atuin, Docker, Obsidian, and the AI CLI of your choice.</p>
+            <div class="callout"><strong><code>fzf</code>:</strong> used by the command palette and interactive selectors. Every Task command can also be called directly.</div>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="demo">
+          <p class="step-number">02</p>
+          <div>
+            <h2>Run the Docker demo</h2>
+            <p>From a release archive or source checkout, build the demo image:</p>
+            <div class="tutorial-command">
+              <span>build locally</span>
+              <button class="copy" type="button" data-copy="docker build -f demo/Dockerfile -t dev-harness-demo .">copy</button>
+              <pre><code>docker build -f demo/Dockerfile -t dev-harness-demo .</code></pre>
+            </div>
+            <div class="tutorial-command">
+              <span>start interactive demo</span>
+              <button class="copy" type="button" data-copy="docker run --rm -it dev-harness-demo">copy</button>
+              <pre><code>docker run --rm -it dev-harness-demo</code></pre>
+            </div>
+            <p>The container starts in a <code>payments-demo</code> repository with a baseline commit, a modified Java file, and a new note. Try <code>gtask</code>, <code>gtask open</code>, <code>gtask changed</code>, <code>gtask search -- retry</code>, and <code>gtask context</code>.</p>
+            <div class="callout">No host folders or credentials are mounted. Files open in terminal <code>less</code>—press <code>q</code> to return. VS Code, Obsidian, Docker-in-Docker, and external AI CLIs are not connected.</div>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="install">
+          <p class="step-number">03</p>
+          <div>
+            <h2>Run the local installer</h2>
+            <p>Download and extract a release archive or use a source checkout, then run the local installer:</p>
+            <div class="tutorial-command">
+              <span>macOS / Git Bash</span>
+              <button class="copy" type="button" data-copy="./install.sh --configure-shell">copy</button>
+              <pre><code>./install.sh --configure-shell</code></pre>
+            </div>
+            <div class="tutorial-command">
+              <span>Windows PowerShell</span>
+              <button class="copy" type="button" data-copy="powershell -ExecutionPolicy Bypass -File .\install.ps1 --configure-shell">copy</button>
+              <pre><code>powershell -ExecutionPolicy Bypass \
+  -File .\install.ps1 --configure-shell</code></pre>
+            </div>
+            <p>Restart the terminal or reload Bash:</p>
+            <pre><code>source ~/.bashrc</code></pre>
+            <p>Updates preserve personal configuration. Uninstall removes only files recorded in the installation manifest.</p>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="configure">
+          <p class="step-number">04</p>
+          <div>
+            <h2>Point Dev Harness at your workplace</h2>
+            <p><code>DEV_WORKPLACE</code> is the directory containing your project folders:</p>
+            <pre><code>~/Workplace/
+├── payments/
+├── orders/
+└── notifications/</code></pre>
+            <p>Edit <code>~/.config/dev-harness/config.env</code>:</p>
+            <pre><code>export DEV_WORKPLACE="$HOME/Workplace"
+export DEV_EDITOR="code"
+
+export DEV_OBSIDIAN_VAULT=""
+export DEV_OBSIDIAN_VAULT_PATH="$HOME/Documents/Obsidian/My Vault"
+
+export DEV_AI_COMMAND="codex"
+export DEV_AI_REVIEW_COMMAND="codex exec -"
+export DEV_AI_RESUME_COMMAND="codex exec -"
+
+export DEV_CONTEXT_MAX_LINES="4000"
+export DEV_RESUME_LIMIT="10"
+export DEV_TODO_DEFAULT_PRIORITY="p2"</code></pre>
+            <p>An empty vault setting uses the active Obsidian vault. Replace the AI command values with Codex, Claude, Gemini, Copilot CLI, OpenCode, or another command that accepts the same input.</p>
+            <div class="tutorial-command">
+              <span>validate</span>
+              <button class="copy" type="button" data-copy="gtask doctor">copy</button>
+              <pre><code>gtask doctor</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="find">
+          <p class="step-number">05</p>
+          <div>
+            <h2>Find a project or file</h2>
+            <p>Open the global palette:</p>
+            <pre><code>gtask</code></pre>
+            <p>Search by task name, English description, or hidden Polish keywords such as <code>projekt</code>, <code>plik</code>, <code>notatka</code>, and <code>zadanie</code>.</p>
+            <div class="command-list">
+              <div><code>cproj</code><span>select a project and change directory</span></div>
+              <div><code>oproj</code><span>select a project and open it in <code>DEV_EDITOR</code></span></div>
+              <div><code>cwork</code><span>change directory to <code>DEV_WORKPLACE</code></span></div>
+              <div><code>cvault</code><span>change directory to <code>DEV_OBSIDIAN_VAULT_PATH</code></span></div>
+              <div><code>resume</code><span>return to a recent project or worktree</span></div>
+              <div><code>gr</code><span>return to the current Git worktree root</span></div>
+              <div><code>dirty</code><span>select unfinished work and change directory</span></div>
+              <div><code>why</code><span>explain the current repository context</span></div>
+              <div><code>gtask open</code><span>select a file below the current directory, with or without Git</span></div>
+              <div><code>gtask changed</code><span>select a changed file, even before the first commit</span></div>
+              <div><code>gtask search -- OrderService</code><span>search repository content</span></div>
+            </div>
+            <p>The <code>resume</code> preview shows branch state, changes relative to the base, and the highest-priority project TODO. It uses Atuin history when available and shell history otherwise.</p>
+            <h3>Orient and hand off</h3>
+            <pre><code>dirty
+why
+focus p0
+handoff --copy
+standup --day</code></pre>
+            <p>Enter in <code>dirty</code> or <code>focus</code> changes the current shell directory; their <code>gtask</code> variants print the selected path. Ctrl-O opens the worktree or TODO note without changing directory. Project resolution for <code>focus</code> fails closed when no unique repository matches.</p>
+            <div class="callout">These commands are read-only unless an option says otherwise. <code>handoff --copy</code> and <code>standup --copy</code> use the clipboard. <code>standup --day</code> appends to today's Daily note. They do not invoke AI. Review commit subjects and TODO titles before sharing the output.</div>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="do">
+          <p class="step-number">06</p>
+          <div>
+            <h2>Create a worktree</h2>
+            <pre><code>cd "$DEV_WORKPLACE/payments"
+gtask wt -- feature/retry-policy
+cwt</code></pre>
+            <p>The generated path contains a timestamp. If the same name already exists, Dev Harness adds a numeric suffix instead of overwriting it.</p>
+            <p>Use the project's own commands for project-specific work:</p>
+            <pre><code>task test
+task build
+task run</code></pre>
+            <p>These are examples of project-local commands. Dev Harness does not define global build, test, run, deploy, or release tasks.</p>
+
+            <h3>Select AI context</h3>
+            <pre><code>gtask changes
+gtask context
+gtask review</code></pre>
+            <p><code>gtask review</code> requires an interactive terminal and explicit <code>fzf</code> selection. Without interaction it fails closed and does not invoke AI.</p>
+            <div class="warning">
+              <p class="eyebrow">All changed files</p>
+              <code>gtask review -- --all</code>
+              <p>This sends every changed path that survives the sensitive-path policy. Review the repository state first.</p>
+            </div>
+            <p>The filter excludes common environment files, private keys, keystores, <code>.ssh</code>, and complete <code>credentials*</code>/<code>secrets*</code> trees. Inspect the selected paths before sending them to an external service.</p>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="remember">
+          <p class="step-number">07</p>
+          <div>
+            <h2>Write notes</h2>
+            <p>Enable the Obsidian command-line interface. On Windows, Dev Harness uses the official <code>Obsidian.com</code> redirector when available.</p>
+            <div class="command-list">
+              <div><code>gtask note -- "Retry design"</code><span>create a normal note under <strong>Notes/</strong></span></div>
+              <div><code>gtask day -- "Fixed payment timeout"</code><span>append today's progress under <strong>Daily/</strong></span></div>
+              <div><code>gtask week -- "Migration completed"</code><span>append a weekly summary under <strong>Weekly/</strong></span></div>
+            </div>
+            <p>Configure Obsidian's Daily notes core plugin to use <code>Daily/</code>. Dev Harness follows that native setting rather than creating a second daily-note convention.</p>
+            <div class="callout"><strong>Tag rule:</strong> use tags for themes such as <code>java</code>, <code>security</code>, or <code>architecture</code>. Keep project, status, priority, and dates as Obsidian properties.</div>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="todo">
+          <p class="step-number">08</p>
+          <div>
+            <h2>Track TODOs</h2>
+            <p>Each TODO is a standalone Markdown file under <code>TODO/&lt;year&gt;/&lt;month&gt;/</code>. Creation runs inside a Git repository so the repository root name becomes the project property.</p>
+            <pre><code>gtask todo -- "Check retry policy"          # P2 default
+gtask todo -- p0 "Fix data leak"
+gtask todo -- p1 "Check retry metrics"
+gtask todo -- p3 "Clean up test names"</code></pre>
+            <div class="priority-grid">
+              <span><strong>P0</strong> critical</span>
+              <span><strong>P1</strong> high</span>
+              <span><strong>P2</strong> medium</span>
+              <span><strong>P3</strong> low</span>
+            </div>
+            <pre><code>gtask todo              # open TODOs for this project
+gtask todo -- p1        # project P1 items
+gtask todos             # open TODOs across the vault
+gtask todos -- done     # completed items
+gtask done              # select and complete
+gtask reopen            # select and reopen</code></pre>
+            <p>Completion only updates <code>status</code> and <code>completed</code>. The path stays stable, so links in Obsidian do not break.</p>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="workflow">
+          <p class="step-number">09</p>
+          <div>
+            <h2>Example daily flow</h2>
+            <pre><code># Find and orient
+dirty
+why
+focus p1
+
+# Do
+gtask wt -- feature/retry-policy
+cwt
+task test
+gtask changes
+gtask review
+
+# Remember
+standup --day
+gtask todo -- p1 "Check retry metrics in test environment"
+
+# Tomorrow
+dirty</code></pre>
+            <div class="flow-strip"><span>Find</span><b>→</b><span>Do</span><b>→</b><span>Remember</span><b>→</b><span>resume</span></div>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="extend">
+          <p class="step-number">10</p>
+          <div>
+            <h2>Extend the global palette</h2>
+            <p>Add general-purpose personal tasks to <code>~/.config/dev-harness/Taskfile.yml</code>. Never edit managed files under <code>~/.dev-harness</code>.</p>
+            <pre><code>version: '3'
+
+tasks:
+  ports:
+    desc: Show listening ports
+    dir: '{{.USER_WORKING_DIR}}'
+    cmds:
+      - your-command-here</code></pre>
+            <p>Run it with <code>gtask ports</code>. To make it searchable, add a tab-separated row to <code>~/.config/dev-harness/palette.tsv</code>:</p>
+            <pre><code>ports&lt;TAB&gt;show listening ports&lt;TAB&gt;network porty sockets</code></pre>
+            <p>Use <code>gtask extend</code> for the built-in guide. Keep project-specific workflows in each project's local Taskfile.</p>
+          </div>
+        </section>
+
+        <section class="tutorial-step" id="troubleshooting">
+          <p class="step-number">11</p>
+          <div>
+            <h2>Diagnose, update, or remove</h2>
+            <div class="command-list">
+              <div><code>gtask doctor</code><span>validate the supported installation</span></div>
+              <div><code>gtask help</code><span>show the workflow cheat sheet</span></div>
+              <div><code>gtask aliases</code><span>show shell and Task fast paths</span></div>
+              <div><code>./install.sh update</code><span>refresh managed files</span></div>
+              <div><code>./install.sh --dry-run</code><span>preview installation without writes</span></div>
+              <div><code>./install.sh uninstall</code><span>remove only managed files</span></div>
+            </div>
+            <p><code>uninstall --purge-config</code> additionally removes known Dev Harness configuration files, but still preserves unknown files, notes, and the Obsidian vault.</p>
+            <div class="next-card">
+              <p class="eyebrow">Next step</p>
+              <h3>Run <code>gtask</code> in a terminal.</h3>
+              <div class="hero-actions">
+                <a class="button primary" href="index.html">Back to overview</a>
+                <a class="button secondary" href="README.md" data-repo-file="README.md">Full README</a>
+              </div>
+            </div>
+          </div>
+        </section>
+      </article>
+    </main>
+
+    <footer>
+      <p>Dev Harness tutorial · v0.3.0</p>
+      <nav aria-label="Project documents">
+        <a href="index.html">Overview</a>
+        <a href="SECURITY.md" data-repo-file="SECURITY.md">Security</a>
+        <a href="CONTRIBUTING.md" data-repo-file="CONTRIBUTING.md">Contributing</a>
+      </nav>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Dev Harness CLI for macOS and Windows Git Bash.">
+    <meta name="theme-color" content="#09110f">
+    <title>Dev Harness — Find · Do · Remember</title>
+    <link rel="stylesheet" href="styles.css?v=0.3.0">
+    <script src="app.js?v=0.3.0" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Dev Harness home">
+        <span class="brand-mark" aria-hidden="true">&gt;_</span>
+        <span>dev harness</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a href="#workflow">Workflow</a>
+        <a href="#install">Install</a>
+        <a href="#security">Safety</a>
+        <a href="tutorial.html">Tutorial</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-copy">
+          <p class="eyebrow">Task + Bash · macOS + Git Bash</p>
+          <h1>Find <span>·</span> Do <span>·</span> Remember</h1>
+          <p class="lede">Global commands for repositories, worktrees, AI context, Docker, and Obsidian.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#install">Install</a>
+            <a class="button secondary" href="tutorial.html">Read the tutorial</a>
+          </div>
+          <ul class="trust-row" aria-label="Product traits">
+            <li>Bash + Task</li>
+            <li>macOS + Git Bash</li>
+            <li>AI vendor-neutral</li>
+            <li>MIT licensed</li>
+          </ul>
+        </div>
+
+        <div class="terminal" aria-label="Example Dev Harness terminal session">
+          <div class="terminal-bar">
+            <span></span><span></span><span></span>
+            <p>payments — feature/retry-policy</p>
+          </div>
+          <div class="terminal-body" aria-live="polite">
+            <div id="terminal-lines"></div>
+            <span class="cursor" aria-hidden="true"></span>
+          </div>
+          <div class="terminal-tabs" role="group" aria-label="Choose terminal demo">
+            <button class="active" data-demo="flow" type="button">daily flow</button>
+            <button data-demo="review" type="button">safe review</button>
+            <button data-demo="remember" type="button">remember</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="principles" id="workflow" aria-labelledby="workflow-title">
+        <div class="section-heading">
+          <p class="eyebrow">Scope</p>
+          <h2 id="workflow-title">Global navigation. Project commands stay local.</h2>
+          <p>Dev Harness handles repository navigation, worktrees, AI context, and notes. Each project defines its own build, test, run, deploy, and release commands.</p>
+        </div>
+
+        <div class="principle-grid">
+          <article id="find" class="principle-card lime">
+            <p class="step">01 / Find</p>
+            <h3>Find a repository</h3>
+            <p>Search recent and modified work, show the current context, or return to the repository root.</p>
+            <code>dirty</code>
+            <code>why</code>
+            <code>gr</code>
+          </article>
+
+          <article id="do" class="principle-card amber">
+            <p class="step">02 / Do</p>
+            <h3>Create a worktree</h3>
+            <p>Create timestamped worktrees, prepare a handoff, or invoke the configured AI command.</p>
+            <code>gtask wt -- feature/retry</code>
+            <code>handoff --copy</code>
+            <code>gtask review</code>
+          </article>
+
+          <article id="remember" class="principle-card cyan">
+            <p class="step">03 / Remember</p>
+            <h3>Write notes and TODOs</h3>
+            <p>Find the highest-priority TODO or append the current status to an Obsidian Daily note.</p>
+            <code>focus p0</code>
+            <code>standup</code>
+            <code>standup --day</code>
+          </article>
+        </div>
+      </section>
+
+      <section class="split-section" id="security">
+        <div class="section-heading compact">
+          <p class="eyebrow">AI context</p>
+          <h2>Select files before review.</h2>
+          <p><code>gtask review</code> requires an interactive terminal and an explicit <code>fzf</code> selection. A non-interactive run stops before invoking AI.</p>
+        </div>
+        <div class="security-panel">
+          <div class="security-row safe">
+            <span>default</span>
+            <div><code>gtask review</code><p>Choose exactly which changed files enter the prompt.</p></div>
+          </div>
+          <div class="security-row caution">
+            <span>--all</span>
+            <div><code>gtask review -- --all</code><p>Send every changed file that survives the sensitive-path policy.</p></div>
+          </div>
+          <p class="fine-print">Common `.env`, private-key, keystore, `.ssh`, `credentials*`, and `secrets*` paths are centrally excluded. Always inspect scope before using an external AI service.</p>
+        </div>
+      </section>
+
+      <section class="knowledge-section" aria-labelledby="knowledge-title">
+        <div class="section-heading">
+          <p class="eyebrow">Obsidian</p>
+          <h2 id="knowledge-title">Vault layout</h2>
+        </div>
+        <div class="vault-window">
+          <div class="tree" aria-label="Obsidian vault structure">
+            <p><span>▾</span> Vault</p>
+            <p class="indent"><span>◇</span> Notes/</p>
+            <p class="indent"><span>◇</span> Daily/</p>
+            <p class="indent"><span>◇</span> Weekly/</p>
+            <p class="indent"><span>▾</span> TODO/</p>
+            <p class="indent-2 muted">TODO.base</p>
+            <p class="indent-2 muted">2026/09/...</p>
+          </div>
+          <div class="note-preview">
+            <p class="note-path">TODO/2026/09/20260903-103000-check-retry-metrics.md</p>
+            <pre><code>type: todo
+status: open
+priority: p1
+project: payments
+tags:
+  - backend
+  - resilience</code></pre>
+            <p>Status, priority, and project are properties. Tags describe reusable themes—not workflow state.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="install-section" id="install" aria-labelledby="install-title">
+        <div class="section-heading compact">
+          <p class="eyebrow">Install</p>
+          <h2 id="install-title">Requirements and installer</h2>
+          <p>Install Bash, Task, Git, and <code>fzf</code>, then run the installer from a release archive or source checkout.</p>
+        </div>
+        <div class="install-grid">
+          <div class="command-card">
+            <div class="command-heading"><span>macOS / Git Bash</span><button class="copy" type="button" data-copy="./install.sh --configure-shell">copy</button></div>
+            <pre><code>./install.sh --configure-shell</code></pre>
+          </div>
+          <div class="command-card">
+            <div class="command-heading"><span>Windows PowerShell</span><button class="copy" type="button" data-copy="powershell -ExecutionPolicy Bypass -File .\install.ps1 --configure-shell">copy</button></div>
+            <pre><code>powershell -ExecutionPolicy Bypass \
+  -File .\install.ps1 --configure-shell</code></pre>
+          </div>
+        </div>
+        <div class="first-run">
+          <span>then</span>
+          <code>gtask doctor</code>
+          <span>→</span>
+          <code>gtask</code>
+          <span>→</span>
+          <code>resume</code>
+        </div>
+      </section>
+
+      <section class="cta">
+        <p class="eyebrow">Documentation</p>
+        <h2>Tutorial and command reference</h2>
+        <p>Install Dev Harness, configure its integrations, and add personal commands to the global palette.</p>
+        <div class="hero-actions center">
+          <a class="button primary" href="tutorial.html">Open tutorial</a>
+          <a class="button secondary" href="README.md" data-repo-file="README.md">Read README</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Dev Harness · MIT · no telemetry</p>
+      <nav aria-label="Project documents">
+        <a href="PRD.md" data-repo-file="PRD.md">PRD</a>
+        <a href="SECURITY.md" data-repo-file="SECURITY.md">Security</a>
+        <a href="CONTRIBUTING.md" data-repo-file="CONTRIBUTING.md">Contributing</a>
+      </nav>
+    </footer>
+  </body>
+</html>

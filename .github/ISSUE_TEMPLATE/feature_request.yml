@@ -1,0 +1,50 @@
+name: Feature request
+description: Propose a cross-project improvement to Dev Harness.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe a recurring developer workflow. Do not include private source,
+        credentials, vault contents, or other confidential material.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Recurring developer problem
+      description: What repeated developer problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Proposed workflow
+      description: Show how a developer would use the feature.
+    validations:
+      required: true
+  - type: textarea
+    id: cross-project-value
+    attributes:
+      label: Why this is cross-project
+      description: Explain why this belongs in a global tool rather than one project.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What existing tools, scripts, or workflows have you considered?
+    validations:
+      required: true
+  - type: checkboxes
+    id: platform-impact
+    attributes:
+      label: Platform impact
+      description: Select every platform that the proposed workflow should support.
+      options:
+        - label: macOS
+        - label: Windows
+        - label: Other or not yet known
+    validations:
+      required: true

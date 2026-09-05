@@ -44,9 +44,11 @@ Required:
 - Git
 - `fzf`
 - `rg` (ripgrep)
+- `grepai`
 
 Optional feature dependencies:
 
+- Ollama (needed for `gtask index` / `gtask semantic` embeddings)
 - the VS Code CLI, Docker, the GitHub CLI, and Atuin
 - `bat` for syntax-highlighted picker previews
 - Obsidian 1.12.7+ with Command line interface and the Bases core plugin enabled
@@ -54,7 +56,9 @@ Optional feature dependencies:
 
 No shipped command currently requires the GitHub CLI. `fzf` is required because
 the default `gtask` command and interactive selectors use it. `rg` is required
-because workplace file pickers and `gtask search` use it.
+because workplace file pickers and `gtask search` use it. `grepai` is required
+because `gtask semantic` and `gtask index` use it. The installer never installs
+third-party binaries.
 
 ## Try the interactive Docker demo
 
@@ -67,7 +71,8 @@ docker run --rm -it dev-harness-demo
 
 The container starts Bash in `payments-demo`, which contains one modified file
 and one untracked file. Try `gtask`, `gtask open`, `gtask changed`,
-`gtask search -- retry`, or `gtask context`. Files open in `less`; press `q` to
+`gtask search -- retry`, `gtask semantic -- retry`, `gtask index`, or
+`gtask context`. Files open in `less`; press `q` to
 return to the picker.
 
 The command mounts no host directories and passes no credentials. VS Code,
@@ -174,6 +179,8 @@ gtask focus -- p0             # select a P0 TODO and print the project path
 gtask open                    # select a file below the current directory
 gtask changed
 gtask search -- OrderService
+gtask semantic -- authentication
+gtask index
 
 gtask wt -- feature/my-change
 gtask worktrees

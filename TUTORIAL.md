@@ -13,10 +13,12 @@ Wymagane są:
 - [Task](https://taskfile.dev/);
 - Git;
 - `fzf`;
-- `rg` (ripgrep).
+- `rg` (ripgrep);
+- `grepai`.
 
 Opcjonalnie warto zainstalować:
 
+- Ollama do lokalnych embeddingów dla `gtask index` / `gtask semantic`;
 - VS Code z poleceniem `code` w `PATH`;
 - Atuin do bogatszej listy ostatnich kontekstów;
 - Obsidian 1.12.7+ z włączonym CLI i Bases;
@@ -40,6 +42,8 @@ gtask
 gtask open
 gtask changed
 gtask search -- retry
+gtask semantic -- retry
+gtask index
 gtask changes
 gtask context
 why
@@ -235,6 +239,8 @@ tekstem użytkownika, więc sprawdź raport przed skopiowaniem lub zapisaniem.
 gtask open
 gtask changed
 gtask search -- OrderService
+gtask semantic -- authentication
+gtask index
 ```
 
 `gtask open` rekurencyjnie przeszukuje katalog, w którym zostało uruchomione, i
@@ -556,6 +562,8 @@ cwt / owt                # worktree: cd / VS Code
 gtask open               # wybierz plik pod bieżącym katalogiem
 gtask changed            # wybierz zmieniony plik
 gtask search -- TEXT     # szukaj w DEV_WORKPLACE
+gtask semantic -- TEXT   # szukaj po znaczeniu
+gtask index              # zbuduj indeks semantyczny
 gtask wt -- BRANCH       # utwórz worktree
 gtask context            # wybierz lokalny kontekst
 gtask review             # interaktywne AI review

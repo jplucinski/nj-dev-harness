@@ -41,7 +41,7 @@ Options:
   -h, --help          Show this help
 
 Required tools:
-  bash, task, git, fzf, rg
+  bash, task, git, fzf, rg, grepai
 EOF
 }
 
@@ -199,7 +199,7 @@ validate_source() {
 
 validate_required_tools() {
   local tool missing=false
-  for tool in bash task git fzf rg; do
+  for tool in bash task git fzf rg grepai; do
     if ! command -v "$tool" >/dev/null 2>&1; then
       warn "Required tool not found in PATH: $tool"
       missing=true

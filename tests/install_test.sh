@@ -49,7 +49,8 @@ create_fake_tools() {
     printf '#!/usr/bin/env bash\nexit 0\n' > "$bin/task"
   fi
   printf '#!/usr/bin/env bash\nexit 0\n' > "$bin/fzf"
-  chmod +x "$bin/task" "$bin/fzf"
+  printf '#!/usr/bin/env bash\nexit 0\n' > "$bin/grepai"
+  chmod +x "$bin/task" "$bin/fzf" "$bin/grepai"
 }
 
 test_install_update_and_purge_preserve_unknown_config() {

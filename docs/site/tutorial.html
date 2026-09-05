@@ -55,7 +55,7 @@
         <section class="tutorial-step" id="requirements">
           <p class="step-number">01</p>
           <div>
-            <h2>Install the five requirements</h2>
+            <h2>Install the six requirements</h2>
             <p>Dev Harness requires:</p>
             <ul class="check-list">
               <li>Bash — system Bash on macOS or Git Bash on Windows</li>
@@ -63,8 +63,9 @@
               <li>Git</li>
               <li><code>fzf</code></li>
               <li><code>rg</code> (ripgrep)</li>
+              <li><code>grepai</code></li>
             </ul>
-            <p>Useful optional integrations include VS Code, Atuin, Docker, Obsidian, and the AI CLI of your choice.</p>
+            <p>Useful optional integrations include VS Code, Atuin, Docker, Obsidian, Ollama, and the AI CLI of your choice.</p>
             <div class="callout"><strong><code>fzf</code>:</strong> used by the command palette and interactive selectors. Every Task command can also be called directly.</div>
           </div>
         </section>
@@ -162,6 +163,8 @@ export DEV_TODO_DEFAULT_PRIORITY="p2"</code></pre>
               <div><code>gtask open</code><span>select a file below the current directory, with or without Git</span></div>
               <div><code>gtask changed</code><span>select a changed file, even before the first commit</span></div>
               <div><code>gtask search -- OrderService</code><span>search workplace content</span></div>
+              <div><code>gtask semantic -- authentication</code><span>search workplace code by meaning</span></div>
+              <div><code>gtask index</code><span>initialize the workplace semantic index</span></div>
             </div>
             <p>The <code>resume</code> preview shows branch state, changes relative to the base, and the highest-priority project TODO. It uses Atuin history when available and shell history otherwise.</p>
             <h3>Orient and hand off</h3>

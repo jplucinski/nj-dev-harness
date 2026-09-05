@@ -535,7 +535,7 @@ test_doctor_reports_an_unavailable_configured_resume_command() {
     DEV_RESUME_LIMIT=10 DEV_TODO_DEFAULT_PRIORITY=p2 DEV_AI_COMMAND=git \
     DEV_AI_RESUME_COMMAND=dev-harness-command-that-does-not-exist \
       bash "$source_dir/scripts/doctor.sh" --json
-  )"
+  )" || true
 
   assert_contains "$output" '"name":"DEV_AI_RESUME_COMMAND","status":"warn"'
   assert_contains "$output" 'configured command is unavailable'

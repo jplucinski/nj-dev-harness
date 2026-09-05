@@ -155,6 +155,8 @@ Ctrl-R   review selected changes with AI
 | `gtask open` | Recursively select a file below the current directory using `rg --files` and open it; Git is not required. |
 | `gtask changed` | Select a modified, staged, or untracked file and open it. |
 | `gtask search -- <query>` | Live-search immediate `DEV_WORKPLACE` children with `rg` and open a selected match. Git is not required. VS Code receives the exact line and column. |
+| `gtask semantic -- <query>` | One-shot semantic search of the workplace `grepai` index and open a selected match. Requires `gtask index` first. |
+| `gtask index` | Initialize `.grepai/config.yaml` if missing, then build or refresh the workplace semantic index. |
 
 Search utilities must respect `.gitignore`. File and directory names containing spaces must work.
 
@@ -387,9 +389,10 @@ gtask doctor -- --json
 
 The validator must check:
 
-- Bash, Task, Git, `fzf`, and `rg` as required dependencies;
+- Bash, Task, Git, `fzf`, `rg`, and `grepai` as required dependencies;
 - `DEV_WORKPLACE` and relevant directory access;
-- optional VS Code, Docker, `gh`, Obsidian CLI, and configured AI commands;
+- workplace `.grepai/config.yaml` (error if missing) and `.grepai/index.gob` (warn, error with `--all`);
+- optional VS Code, Docker, `gh`, Ollama, Obsidian CLI, and configured AI commands;
 - whether the current directory is a Git repository when repository-specific checks are requested.
 
 Missing required dependencies produce an error. Missing optional integrations produce a warning unless `--all` is used. The validator never installs or changes anything.
@@ -459,8 +462,8 @@ managed Taskfile (~/.dev-harness/Taskfile.yml)
           ↓
 small Bash scripts (~/.dev-harness/scripts)
           ↓
-required: bash · task · git · fzf · rg
-optional: code · docker · obsidian · AI CLI
+required: bash · task · git · fzf · rg · grepai
+optional: code · docker · obsidian · ollama · AI CLI
 ```
 
 Responsibilities:

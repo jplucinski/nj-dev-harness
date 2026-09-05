@@ -61,16 +61,21 @@ show_welcome() {
     '  gtask open            pick and open a repository file' \
     '  gtask changed         pick one of the prepared changes' \
     '  gtask search -- retry search workplace code and notes' \
+    '  gtask semantic -- retry search workplace code by meaning' \
+    '  gtask index           initialize the workplace semantic index' \
     '  gtask changes         summarize the prepared changes' \
     '  gtask context         select files for AI context' \
     '  why                   explain this repository context' \
     '' \
     'Run exit to stop. Docker --rm removes the container.' \
-    'Not connected: VS Code, Obsidian, Docker-in-Docker, external AI CLIs.' \
+    'Not connected: VS Code, Obsidian, Docker-in-Docker, external AI CLIs, Ollama.' \
     ''
 }
 
 prepare_repository
+if command -v grepai >/dev/null 2>&1; then
+  (cd "$workplace" && grepai init --yes --provider ollama --backend gob)
+fi
 show_welcome
 
 case "${1:-}" in

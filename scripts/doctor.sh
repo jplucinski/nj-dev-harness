@@ -48,10 +48,12 @@ check_command task true
 check_command git true
 check_command fzf true
 check_command rg true
+check_command grepai true
 check_command "${DEV_EDITOR:-code}" false
 check_command docker false
 check_command gh false
 check_command atuin false
+check_command ollama false
 
 if obsidian_cmd="$(obsidian_executable 2>/dev/null)"; then
   add_check obsidian ok "$(command -v "$obsidian_cmd")"
@@ -63,6 +65,18 @@ fi
 
 if [ -n "${DEV_WORKPLACE:-}" ] && [ -d "$DEV_WORKPLACE" ]; then
   add_check DEV_WORKPLACE ok "$DEV_WORKPLACE"
+  if [ -f "$DEV_WORKPLACE/.grepai/config.yaml" ]; then
+    add_check grepai-config ok "$DEV_WORKPLACE/.grepai/config.yaml"
+  else
+    add_check grepai-config error "run gtask index"
+  fi
+  if [ -f "$DEV_WORKPLACE/.grepai/index.gob" ]; then
+    add_check grepai-index ok "$DEV_WORKPLACE/.grepai/index.gob"
+  elif [ "$strict" = true ]; then
+    add_check grepai-index error "run gtask index"
+  else
+    add_check grepai-index warn "run gtask index"
+  fi
 elif [ "$strict" = true ]; then
   add_check DEV_WORKPLACE error "unset or directory does not exist"
 else

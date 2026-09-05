@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added workplace-wide live `gtask search` across immediate `DEV_WORKPLACE`
-  children, and made `rg` a required dependency.
+  children, `gtask semantic` / `gtask index` on local `grepai`, and made `rg`
+  and `grepai` required dependencies.
 - Made `gtask open` available outside Git, searching recursively below the
   current directory, and added `cwork`/`cvault` directory shortcuts.
 - Added the `gr`, `dirty`, `why`, `handoff`, `standup`, and `focus` workflow

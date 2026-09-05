@@ -2,6 +2,7 @@
 FROM debian:bookworm-slim
 
 ARG TASK_VERSION=3.52.0
+ARG GREPAI_VERSION=0.35.0
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -32,6 +33,22 @@ RUN set -eux; \
     tar -xzf "/tmp/$asset" -C /usr/local/bin task; \
     rm -f "/tmp/$asset" /tmp/task_checksums.txt /tmp/task.sha256; \
     task --version
+
+RUN set -eux; \
+    case "$(dpkg --print-architecture)" in \
+      amd64) grepai_arch=amd64 ;; \
+      arm64) grepai_arch=arm64 ;; \
+      *) printf 'Unsupported architecture\n' >&2; exit 1 ;; \
+    esac; \
+    asset="grepai_${GREPAI_VERSION}_linux_${grepai_arch}.tar.gz"; \
+    release_url="https://github.com/yoanbernabeu/grepai/releases/download/v${GREPAI_VERSION}"; \
+    curl -fsSLo "/tmp/$asset" "$release_url/$asset"; \
+    curl -fsSLo /tmp/grepai_checksums.txt "$release_url/checksums.txt"; \
+    grep -E "^[0-9a-f]{64}[[:space:]]+$asset$" /tmp/grepai_checksums.txt > /tmp/grepai.sha256; \
+    (cd /tmp && sha256sum -c grepai.sha256); \
+    tar -xzf "/tmp/$asset" -C /usr/local/bin grepai; \
+    rm -f "/tmp/$asset" /tmp/grepai_checksums.txt /tmp/grepai.sha256; \
+    grepai version
 
 RUN useradd --create-home --shell /bin/bash demo
 

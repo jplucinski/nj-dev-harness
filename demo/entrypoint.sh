@@ -60,7 +60,7 @@ show_welcome() {
     '  gtask                 open the searchable command palette' \
     '  gtask open            pick and open a repository file' \
     '  gtask changed         pick one of the prepared changes' \
-    '  gtask search -- retry search code and notes' \
+    '  gtask search -- retry search workplace code and notes' \
     '  gtask changes         summarize the prepared changes' \
     '  gtask context         select files for AI context' \
     '  why                   explain this repository context' \

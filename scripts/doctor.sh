@@ -47,7 +47,7 @@ check_command bash true
 check_command task true
 check_command git true
 check_command fzf true
-check_command rg false
+check_command rg true
 check_command "${DEV_EDITOR:-code}" false
 check_command docker false
 check_command gh false

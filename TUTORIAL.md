@@ -12,11 +12,11 @@ Wymagane są:
 - Bash — systemowy na macOS albo Git Bash na Windows;
 - [Task](https://taskfile.dev/);
 - Git;
-- `fzf`.
+- `fzf`;
+- `rg` (ripgrep).
 
 Opcjonalnie warto zainstalować:
 
-- `rg` do szybkiego przeszukiwania kodu;
 - VS Code z poleceniem `code` w `PATH`;
 - Atuin do bogatszej listy ostatnich kontekstów;
 - Obsidian 1.12.7+ z włączonym CLI i Bases;
@@ -555,7 +555,7 @@ cwork / cvault           # przejdź do workplace / vaulta
 cwt / owt                # worktree: cd / VS Code
 gtask open               # wybierz plik pod bieżącym katalogiem
 gtask changed            # wybierz zmieniony plik
-gtask search -- TEXT     # szukaj w repozytorium
+gtask search -- TEXT     # szukaj w DEV_WORKPLACE
 gtask wt -- BRANCH       # utwórz worktree
 gtask context            # wybierz lokalny kontekst
 gtask review             # interaktywne AI review

@@ -43,16 +43,18 @@ Required:
 - [Task](https://taskfile.dev/)
 - Git
 - `fzf`
+- `rg` (ripgrep)
 
 Optional feature dependencies:
 
-- `rg`, the VS Code CLI, Docker, the GitHub CLI, and Atuin
+- the VS Code CLI, Docker, the GitHub CLI, and Atuin
 - `bat` for syntax-highlighted picker previews
 - Obsidian 1.12.7+ with Command line interface and the Bases core plugin enabled
 - any desired AI CLI for AI and review commands
 
 No shipped command currently requires the GitHub CLI. `fzf` is required because
-the default `gtask` command and interactive selectors use it.
+the default `gtask` command and interactive selectors use it. `rg` is required
+because workplace file pickers and `gtask search` use it.
 
 ## Try the interactive Docker demo
 
@@ -89,7 +91,7 @@ From Windows PowerShell:
 powershell -ExecutionPolicy Bypass -File .\install.ps1 --configure-shell
 ```
 
-The installer validates Bash, Task, Git, and `fzf` before writing anything. It then:
+The installer validates Bash, Task, Git, `fzf`, and `rg` before writing anything. It then:
 
 - installs versioned, managed files in `~/.dev-harness`;
 - creates `~/.config/dev-harness/config.env` only when missing and preserves it on updates;

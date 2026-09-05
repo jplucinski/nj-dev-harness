@@ -41,7 +41,7 @@ Options:
   -h, --help          Show this help
 
 Required tools:
-  bash, task, git, fzf
+  bash, task, git, fzf, rg
 EOF
 }
 
@@ -199,7 +199,7 @@ validate_source() {
 
 validate_required_tools() {
   local tool missing=false
-  for tool in bash task git fzf; do
+  for tool in bash task git fzf rg; do
     if ! command -v "$tool" >/dev/null 2>&1; then
       warn "Required tool not found in PATH: $tool"
       missing=true
@@ -210,7 +210,7 @@ validate_required_tools() {
 
 report_optional_tools() {
   local tool missing=()
-  for tool in rg code gh docker atuin; do
+  for tool in code gh docker atuin; do
     command -v "$tool" >/dev/null 2>&1 || missing+=("$tool")
   done
   if [ "${#missing[@]}" -gt 0 ]; then

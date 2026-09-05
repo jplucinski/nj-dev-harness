@@ -594,6 +594,51 @@ test_doctor_reports_fzf_as_required_json_error() {
   assert_contains "$output" '"name":"fzf","status":"error"'
 }
 
+test_install_requires_rg_before_writing() {
+  local fixture="$test_root/install-requires-rg" fake_bin home output status=0
+  fake_bin="$fixture/bin"
+  home="$fixture/home"
+  mkdir -p "$fake_bin" "$home"
+  create_command_wrapper "$fake_bin" bash
+  create_command_wrapper "$fake_bin" task
+  create_command_wrapper "$fake_bin" git
+  create_command_wrapper "$fake_bin" dirname
+  create_command_wrapper "$fake_bin" tr
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$fake_bin/fzf"
+  chmod +x "$fake_bin/fzf"
+
+  output="$(
+    HOME="$home" \
+    PATH="$fake_bin" \
+      bash "$source_dir/install.sh" install --dry-run 2>&1
+  )" || status=$?
+
+  [ "$status" -ne 0 ] || fail 'Installer accepted a PATH without rg'
+  [ ! -e "$home/.dev-harness" ] || fail 'Installer wrote ~/.dev-harness before rejecting rg'
+  [ ! -e "$home/.config/dev-harness" ] || fail 'Installer wrote ~/.config/dev-harness before rejecting rg'
+  assert_contains "$output" 'Required tool not found in PATH: rg'
+}
+
+test_doctor_reports_rg_as_required_json_error() {
+  local fixture="$test_root/doctor-requires-rg" fake_bin output
+  fake_bin="$fixture/bin"
+  mkdir -p "$fake_bin"
+  create_command_wrapper "$fake_bin" bash
+  create_command_wrapper "$fake_bin" task
+  create_command_wrapper "$fake_bin" git
+  create_command_wrapper "$fake_bin" dirname
+  create_command_wrapper "$fake_bin" sed
+  printf '%s\n' '#!/usr/bin/env bash' 'exit 0' > "$fake_bin/fzf"
+  chmod +x "$fake_bin/fzf"
+
+  output="$(
+    PATH="$fake_bin" \
+      bash "$source_dir/scripts/doctor.sh" --json 2>&1
+  )" || true
+
+  assert_contains "$output" '"name":"rg","status":"error"'
+}
+
 test_context_truncates_large_untracked_files_without_error() {
   local repo="$test_root/untracked-truncation/repository" output status=0
   create_repo "$repo"
@@ -659,5 +704,9 @@ test_install_requires_fzf_before_writing
 printf 'PASS: installer requires fzf before writing\n'
 test_doctor_reports_fzf_as_required_json_error
 printf 'PASS: doctor reports fzf as a required JSON error\n'
+test_install_requires_rg_before_writing
+printf 'PASS: installer requires rg before writing\n'
+test_doctor_reports_rg_as_required_json_error
+printf 'PASS: doctor reports rg as a required JSON error\n'
 test_context_truncates_large_untracked_files_without_error
 printf 'PASS: context safely truncates large untracked files\n'

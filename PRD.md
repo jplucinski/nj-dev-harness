@@ -154,7 +154,7 @@ Ctrl-R   review selected changes with AI
 | `gtask resume` | Open the same resume picker from the global Task catalogue; Enter prints the selected path because a child process cannot change its parent shell. |
 | `gtask open` | Recursively select a file below the current directory using `rg --files` and open it; Git is not required. |
 | `gtask changed` | Select a modified, staged, or untracked file and open it. |
-| `gtask search -- <query>` | Search repository text with `rg` and open a selected match. VS Code receives the exact line and column. |
+| `gtask search -- <query>` | Live-search immediate `DEV_WORKPLACE` children with `rg` and open a selected match. Git is not required. VS Code receives the exact line and column. |
 
 Search utilities must respect `.gitignore`. File and directory names containing spaces must work.
 
@@ -387,9 +387,9 @@ gtask doctor -- --json
 
 The validator must check:
 
-- Bash, Task, Git, and `fzf` as required dependencies;
+- Bash, Task, Git, `fzf`, and `rg` as required dependencies;
 - `DEV_WORKPLACE` and relevant directory access;
-- optional `rg`, VS Code, Docker, `gh`, Obsidian CLI, and configured AI commands;
+- optional VS Code, Docker, `gh`, Obsidian CLI, and configured AI commands;
 - whether the current directory is a Git repository when repository-specific checks are requested.
 
 Missing required dependencies produce an error. Missing optional integrations produce a warning unless `--all` is used. The validator never installs or changes anything.
@@ -412,7 +412,7 @@ Dev Harness has one Bash installer and two entry points:
 
 The installer must:
 
-- validate Bash, Task, Git, and `fzf` before changing user files;
+- validate Bash, Task, Git, `fzf`, and `rg` before changing user files;
 - report missing optional integrations without installing them;
 - support `install`, `update`, `uninstall`, `--dry-run`, and `--configure-shell`;
 - keep a version and installation manifest under `~/.dev-harness`;
@@ -459,8 +459,8 @@ managed Taskfile (~/.dev-harness/Taskfile.yml)
           ↓
 small Bash scripts (~/.dev-harness/scripts)
           ↓
-required: bash · task · git · fzf
-optional: rg · code · docker · obsidian · AI CLI
+required: bash · task · git · fzf · rg
+optional: code · docker · obsidian · AI CLI
 ```
 
 Responsibilities:

@@ -6,3 +6,4 @@ Thumbs.db
 test-output/
 tests/output/
 /dist/
+.worktrees/

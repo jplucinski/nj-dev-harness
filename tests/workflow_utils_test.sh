@@ -6,7 +6,7 @@ test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-workflow-utils-test.XXXXXX")
 
 cleanup() {
   case "$test_root" in
-    "${TMPDIR:-/tmp}"/dev-harness-workflow-utils-test.*) rm -rf -- "$test_root" ;;
+    *dev-harness-workflow-utils-test.*) rm -rf -- "$test_root" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_root" >&2 ;;
   esac
 }
@@ -233,7 +233,7 @@ test_dirty_handles_preview_cancel_clean_and_missing_workplace() {
   printf '%s\n' '#!/usr/bin/env bash' 'exit 130' > "$fake_bin/fzf"
   chmod +x "$fake_bin/fzf"
 
-  output="$(cd "$current" && DEV_WORKPLACE= bash "$source_dir/scripts/dirty.sh" candidates)"
+  output="$(cd "$current" && DEV_WORKPLACE='' bash "$source_dir/scripts/dirty.sh" candidates)"
   expected_root="$(cd "$current" && pwd -P)"
   assert_contains "$output" "$expected_root"
 
@@ -245,7 +245,7 @@ test_dirty_handles_preview_cancel_clean_and_missing_workplace() {
 
   output="$(
     cd "$current"
-    PATH="$fake_bin:$PATH" DEV_WORKPLACE= bash "$source_dir/scripts/dirty.sh" select
+    PATH="$fake_bin:$PATH" DEV_WORKPLACE='' bash "$source_dir/scripts/dirty.sh" select
   )"
   assert_equals "$output" ''
 
@@ -809,12 +809,12 @@ test_palette_contextually_exposes_workflow_utilities() {
   )"
   assert_equals "$output" ''
   assert_contains "$(cat "$palette_log")" $'dirty\t'
-  assert_contains "$(cat "$palette_log")" 'dirty brudne zmiany'
+  assert_contains "$(cat "$palette_log")" 'dirty modified changes'
   ! grep -Eq '^(why|handoff|standup|focus)\t' "$palette_log" || fail 'Repository-only palette rows leaked outside Git'
 
   output="$(
     cd "$repo"
-    PATH="$minimal_path" DEV_WORKPLACE= PALETTE_LOG="$palette_log" \
+    PATH="$minimal_path" DEV_WORKPLACE='' PALETTE_LOG="$palette_log" \
       bash "$source_dir/scripts/palette.sh" select
   )"
   assert_equals "$output" ''
@@ -827,12 +827,12 @@ test_palette_contextually_exposes_workflow_utilities() {
   create_fake_obsidian "$bin"
   output="$(
     cd "$test_root"
-    PATH="$minimal_path" DEV_WORKPLACE= PALETTE_LOG="$palette_log" \
+    PATH="$minimal_path" DEV_WORKPLACE='' PALETTE_LOG="$palette_log" \
       bash "$source_dir/scripts/palette.sh" select
   )"
   assert_equals "$output" ''
   assert_contains "$(cat "$palette_log")" $'focus\t'
-  assert_contains "$(cat "$palette_log")" 'focus priorytet skupienie'
+  assert_contains "$(cat "$palette_log")" 'focus priority project foc'
 }
 
 test_help_lists_every_workflow_fast_path_and_task_alias() {

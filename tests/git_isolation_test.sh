@@ -5,7 +5,7 @@ test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-git-isolation-test.XXXXXX")"
 
 cleanup() {
   case "$test_root" in
-    "${TMPDIR:-/tmp}"/dev-harness-git-isolation-test.*) rm -rf -- "$test_root" ;;
+    *dev-harness-git-isolation-test.*) rm -rf -- "$test_root" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_root" >&2 ;;
   esac
 }

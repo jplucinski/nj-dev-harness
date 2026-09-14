@@ -4,7 +4,7 @@ set -euo pipefail
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-resume-test.XXXXXX")"
 original_dir="$PWD"
-trap 'cd "$original_dir"; rm -rf -- "$test_root"' EXIT
+trap 'cd "$original_dir" || true; rm -rf -- "$test_root" || true' EXIT
 mkdir -p "$test_root/run"
 cd "$test_root/run"
 
@@ -73,7 +73,7 @@ test_recent_atuin_directories_are_collapsed_to_one_repository() {
   )"
 
   assert_contains "$output" $'payments api\tmain\t2 minutes ago\t'
-  count="$(printf '%s\n' "$output" | grep -Fc "$repo")"
+  count="$(printf '%s\n' "$output" | grep -Fc "$repo" || true)"
   assert_equals "$count" 1
 }
 

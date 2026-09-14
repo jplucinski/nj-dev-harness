@@ -1,41 +1,42 @@
 # Dev Harness: tutorial
 
-Instrukcja obejmuje instalację, wybór projektu, worktree, kontekst dla AI oraz
-notatki i TODO w Obsidianie.
+Install Dev Harness, pick a project, create a worktree, build AI context, and
+keep notes and TODOs in Obsidian.
 
-> Dev Harness udostępnia ogólne narzędzia deweloperskie. Polecenia właściwe dla projektu, takie jak budowanie, testowanie czy uruchamianie aplikacji, nadal należą do lokalnego `Taskfile.yml` projektu.
+> Dev Harness ships general developer tools. Build, test, run, deploy, and
+> release stay in each project's local `Taskfile.yml`.
 
-## 1. Przygotuj środowisko
+## 1. Requirements
 
-Wymagane są:
+Required:
 
-- Bash — systemowy na macOS albo Git Bash na Windows;
-- [Task](https://taskfile.dev/);
-- Git;
-- `fzf`;
-- `rg` (ripgrep);
-- `grepai`.
+- Bash — system Bash on macOS, or Git Bash on Windows
+- [Task](https://taskfile.dev/)
+- Git
+- `fzf`
+- `rg` (ripgrep)
+- `grepai`
 
-Opcjonalnie warto zainstalować:
+Optional:
 
-- Ollama do lokalnych embeddingów dla `gtask index` / `gtask semantic`;
-- VS Code z poleceniem `code` w `PATH`;
-- Atuin do bogatszej listy ostatnich kontekstów;
-- Obsidian 1.12.7+ z włączonym CLI i Bases;
-- wybrane CLI AI, np. Codex, Claude, Gemini, Copilot CLI lub OpenCode;
-- Docker, jeżeli chcesz używać `gtask logs` i `gtask shell`.
+- Ollama for local embeddings used by `gtask index` / `gtask semantic`
+- VS Code with `code` on `PATH`
+- Atuin for a richer recent-context list
+- Obsidian 1.12.7+ with CLI and Bases enabled
+- an AI CLI such as Codex, Claude, Gemini, Copilot CLI, or OpenCode
+- Docker, if you want `gtask logs` and `gtask shell`
 
-## Demo bez instalacji — Docker
+## Demo without installing — Docker
 
-W katalogu rozpakowanego wydania albo checkoutu źródeł wykonaj:
+From an extracted release or source checkout:
 
 ```bash
 docker build -f demo/Dockerfile -t dev-harness-demo .
 docker run --rm -it dev-harness-demo
 ```
 
-Kontener uruchomi Bash w repozytorium `payments-demo` z jednym zmodyfikowanym i
-jednym nieśledzonym plikiem:
+The container starts Bash in `payments-demo` with one modified file and one
+untracked file:
 
 ```bash
 gtask
@@ -49,16 +50,16 @@ gtask context
 why
 ```
 
-W demo edytorem jest `less`; klawisz `q` wraca do pickera.
-Kontener nie montuje katalogów hosta ani nie otrzymuje sekretów. VS Code,
-Obsidian, Docker-in-Docker i zewnętrzne CLI AI nie są podłączone.
-Polecenie `exit` kończy sesję, a `--rm` usuwa kontener.
+In the demo, files open in `less`; press `q` to return to the picker.
+The container mounts no host directories and receives no secrets. VS Code,
+Obsidian, Docker-in-Docker, and external AI CLIs are not connected.
+`exit` ends the session; `--rm` removes the container.
 
-## 2. Zainstaluj Dev Harness
+## 2. Install Dev Harness
 
-Uruchom polecenie z katalogu zawierającego źródła albo rozpakowane wydanie.
+Run the installer from the source checkout or extracted release.
 
-### macOS lub Git Bash
+### macOS or Git Bash
 
 ```bash
 ./install.sh --configure-shell
@@ -66,25 +67,25 @@ Uruchom polecenie z katalogu zawierającego źródła albo rozpakowane wydanie.
 
 ### Windows PowerShell
 
-PowerShell uruchamia instalator w Git Bash:
+PowerShell runs the installer in Git Bash:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\install.ps1 --configure-shell
 ```
 
-Instalator sprawdza wymagane narzędzia przed zapisem. Pliki zarządzane trafiają
-do `~/.dev-harness`, konfiguracja do `~/.config/dev-harness`, a opcja
-`--configure-shell` dodaje oznaczony blok do `~/.bashrc`.
+The installer checks required tools before writing files. Managed files go to
+`~/.dev-harness`, configuration to `~/.config/dev-harness`, and
+`--configure-shell` appends a marked block to `~/.bashrc`.
 
-Uruchom ponownie terminal albo wczytaj konfigurację:
+Restart the terminal or reload:
 
 ```bash
 source ~/.bashrc
 ```
 
-## 3. Skonfiguruj pierwszy workplace
+## 3. Configure the workplace
 
-`DEV_WORKPLACE` wskazuje katalog zawierający Twoje projekty Git. Przykładowy układ:
+`DEV_WORKPLACE` is the directory that holds your Git projects. Example layout:
 
 ```text
 ~/Workplace/
@@ -93,33 +94,33 @@ source ~/.bashrc
 └── notifications/
 ```
 
-Otwórz plik:
+Open:
 
 ```text
 ~/.config/dev-harness/config.env
 ```
 
-Minimalna konfiguracja:
+Minimum:
 
 ```bash
 export DEV_WORKPLACE="$HOME/Workplace"
 export DEV_EDITOR="code"
 ```
 
-Przykład pełniejszej konfiguracji:
+A fuller example:
 
 ```bash
 export DEV_WORKPLACE="$HOME/Workplace"
 export DEV_EDITOR="code"
 
-# Opcjonalny wspólny katalog worktree. Bez tej wartości używany jest
-# sąsiedni katalog .worktrees obok repozytorium.
+# Optional shared worktree directory. If unset, Dev Harness uses a sibling
+# .worktrees directory next to the repository.
 # export DEV_WORKTREE_ROOT="$HOME/Worktrees"
 
-# Pusta wartość oznacza aktywny vault Obsidiana.
+# Empty value means the active Obsidian vault.
 export DEV_OBSIDIAN_VAULT=""
 
-# Ścieżka katalogu vaulta używana przez skrót cvault.
+# Vault directory used by the cvault shortcut.
 # export DEV_OBSIDIAN_VAULT_PATH="$HOME/Documents/Obsidian/My Vault"
 
 export DEV_AI_COMMAND="codex"
@@ -130,25 +131,26 @@ export DEV_CONTEXT_MAX_LINES="4000"
 export DEV_RESUME_LIMIT="10"
 export DEV_TODO_DEFAULT_PRIORITY="p2"
 
-# Przydatne, jeśli Git nie potrafi sam wykryć głównej gałęzi.
+# Set this if Git cannot detect the main branch.
 # export DEV_MAIN_BRANCH="main"
 ```
 
-Po zmianie konfiguracji otwórz nowy terminal lub ponownie wykonaj `source ~/.bashrc`.
+After changing config, open a new terminal or run `source ~/.bashrc` again.
 
-## 4. Sprawdź instalację
+## 4. Check the install
 
 ```bash
 gtask doctor
 ```
 
-Podstawowy tryb rozróżnia błędy od brakujących opcjonalnych integracji. Bardziej rygorystyczna kontrola traktuje również brak narzędzi opcjonalnych jako błąd:
+Default mode reports errors separately from missing optional integrations.
+`--all` also treats missing optional tools as errors:
 
 ```bash
 gtask doctor -- --all
 ```
 
-Polecenia pomocy:
+Help commands:
 
 ```bash
 gtask help
@@ -156,84 +158,84 @@ gtask aliases
 gtask --list
 ```
 
-## 5. Find — znajdź kontekst pracy
+## 5. Find — locate work context
 
-### Paleta poleceń
+### Command palette
 
-Uruchomienie `gtask` bez argumentów otwiera paletę `fzf`:
+`gtask` with no arguments opens the `fzf` palette:
 
 ```bash
 gtask
 ```
 
-Wpisz fragment nazwy lub opis, także po polsku, np. `projekt`, `plik`, `notatka` albo `zadanie`. Wybrane polecenie zostanie zapisane w historii Bash, a przy aktywnym Atuinie również w jego historii.
+Type part of a command name or description, for example `project`, `file`,
+`note`, or `todo`. The chosen command is written to Bash history, and to Atuin
+history when Atuin is active.
 
-### Wybierz projekt
+### Pick a project
 
 ```bash
-cproj    # wybierz projekt i przejdź do niego
-oproj    # wybierz projekt i otwórz go w DEV_EDITOR
-cwork    # przejdź do DEV_WORKPLACE
-cvault   # przejdź do DEV_OBSIDIAN_VAULT_PATH
+cproj    # select a project and cd into it
+oproj    # select a project and open it in DEV_EDITOR
+cwork    # cd to DEV_WORKPLACE
+cvault   # cd to DEV_OBSIDIAN_VAULT_PATH
 ```
 
-Oba polecenia korzystają z katalogów bezpośrednio pod `DEV_WORKPLACE`.
+`cproj` and `oproj` list directories directly under `DEV_WORKPLACE`.
 
-### Wróć do ostatniej pracy
+### Return to recent work
 
 ```bash
 resume
 ```
 
-Lista zawiera projekty, worktree i, jeśli jest dostępny, katalogi z historii
-Atuin. Podgląd wybranego elementu pokazuje branch, zmiany względem bazy i
-najważniejsze TODO.
+The list includes projects, worktrees, and Atuin history directories when
+available. Preview shows the branch, changes relative to the base, and the
+highest-priority TODO.
 
-Najważniejsze akcje w pickerze `resume`:
+`resume` picker keys:
 
 ```text
-Enter    przejdź do wybranego katalogu
-Ctrl-O   otwórz w DEV_EDITOR
-Ctrl-Y   skopiuj kontekst wznowienia
-Ctrl-A   wyślij kontekst do skonfigurowanego AI
-Ctrl-R   rozpocznij review zmian worktree
+Enter    cd to the selected directory
+Ctrl-O   open in DEV_EDITOR
+Ctrl-Y   copy resume context
+Ctrl-A   send context to the configured AI
+Ctrl-R   start a worktree change review
 ```
 
-Wariant taskowy drukuje wybraną ścieżkę, ponieważ nie może zmienić katalogu
-procesu nadrzędnego:
+The Task variant prints the selected path; it cannot change the parent
+process directory:
 
 ```bash
 gtask resume
 ```
 
-### Szybka orientacja i przekazanie pracy
-
-Dostępne fast pathy:
+### Fast paths and handoff
 
 ```bash
-gr                  # wróć do roota bieżącego worktree
-dirty               # przejdź do repozytorium z niezapisanymi zmianami
-why                 # zobacz branch, bazę, zmiany, commity i następne TODO
-focus p0            # wybierz najważniejsze TODO i przejdź do jego projektu
-handoff --copy      # skopiuj kontekst po odfiltrowaniu sekretów
-standup --day       # dopisz lokalny status do dzisiejszej notatki Daily
+gr                  # cd to the current worktree root
+dirty               # jump to a repository with unfinished changes
+why                 # show branch, base, changes, commits, and next TODO
+focus p0            # pick the highest-priority TODO and cd to its project
+handoff --copy      # copy secret-filtered context
+standup --day       # append local status to today's Daily note
 ```
 
-W pickerach `dirty` i `focus` klawisz Enter zmienia katalog tylko dla funkcji
-shellowej. Wersje `gtask dirty` i `gtask focus -- p0` drukują ścieżkę, ponieważ
-proces potomny nie może zmienić katalogu terminala. Ctrl-O otwiera odpowiednio
-worktree w `DEV_EDITOR` albo notatkę TODO w Obsidianie.
+In the `dirty` and `focus` pickers, Enter changes directory only for the shell
+function. `gtask dirty` and `gtask focus -- p0` print the path because a child
+process cannot change the terminal directory. Ctrl-O opens the worktree in
+`DEV_EDITOR` or the TODO note in Obsidian.
 
-`focus` nie zgaduje projektu. Najpierw sprawdza bieżące repozytorium, następnie
-bezpośrednie katalogi w `DEV_WORKPLACE`; brak dopasowania i wiele dopasowań kończą
-się czytelnym błędem. TODO nadal można wtedy otworzyć przez Ctrl-O.
+`focus` does not guess the project. It checks the current repository first,
+then direct children of `DEV_WORKPLACE`. No match or multiple matches fail with
+an error. You can still open the TODO with Ctrl-O.
 
-Domyślne tryby niczego nie zapisują. `handoff --copy` i `standup --copy` jawnie
-używają schowka, a `standup --day` jest jedynym automatycznym zapisem Daily w tym
-zestawie. Żadne z tych poleceń nie uruchamia AI. Tematy commitów i tytuły TODO są
-tekstem użytkownika, więc sprawdź raport przed skopiowaniem lub zapisaniem.
+Default modes write nothing. `handoff --copy` and `standup --copy` use the
+clipboard. `standup --day` is the only automatic Daily write in this set.
+None of these commands start AI. Commit subjects and TODO titles are your
+text; read the report before copying or saving it.
 
-### Znajdź plik albo symbol
+### Find a file or symbol
 
 ```bash
 gtask open
@@ -243,50 +245,50 @@ gtask semantic -- authentication
 gtask index
 ```
 
-`gtask open` rekurencyjnie przeszukuje katalog, w którym zostało uruchomione, i
-nie wymaga repozytorium Git. `gtask changed` działa również w repozytorium bez
-pierwszego commita. Pickery pozwalają m.in. otworzyć wynik w edytorze oraz
-przekazać wybrane pliki do AI.
+`gtask open` searches recursively from the current directory and does not
+require Git. `gtask changed` also works in a repository with no first commit.
+Pickers can open a result in the editor or send selected files to AI.
 
-## 6. Do — pracuj w izolowanym worktree
+## 6. Do — work in an isolated worktree
 
-Przejdź do bazowego repozytorium i utwórz worktree:
+Go to the base repository and create a worktree:
 
 ```bash
 cd "$DEV_WORKPLACE/payments"
 gtask wt -- feature/retry-policy
 ```
 
-Nazwa zawiera datę i czas. Jeśli ścieżka już istnieje, otrzymuje sufiks liczbowy.
+The path includes a date and time. If that path already exists, a numeric
+suffix is added.
 
-Znajdź utworzone worktree:
+Find the worktree:
 
 ```bash
 gtask worktrees
-cwt     # wybierz i przejdź do worktree
-owt     # wybierz i otwórz w DEV_EDITOR
+cwt     # select and cd
+owt     # select and open in DEV_EDITOR
 ```
 
-Picker worktree obsługuje:
+Worktree picker keys:
 
 ```text
-Enter    wybór ścieżki
-Ctrl-O   otwarcie w DEV_EDITOR
-Ctrl-Y   kopiowanie ścieżki
-Ctrl-A   uruchomienie AI wewnątrz worktree
-Ctrl-X   status i potwierdzane usunięcie
+Enter    select the path
+Ctrl-O   open in DEV_EDITOR
+Ctrl-Y   copy the path
+Ctrl-A   start AI inside the worktree
+Ctrl-X   status, then confirmed delete
 ```
 
-## 7. Zbuduj bezpieczny kontekst dla AI
+## 7. Build filtered AI context
 
-Podsumowanie i wybór kontekstu:
+Summarize and select context:
 
 ```bash
 gtask changes
 gtask context
 ```
 
-`gtask context` pozwala wybrać pliki. Dostępne warianty:
+`gtask context` lets you pick files. Variants:
 
 ```bash
 gtask context -- --all
@@ -294,66 +296,73 @@ gtask context -- --staged
 gtask context -- --copy
 ```
 
-Kontekst zawiera ograniczony diff i informacje o repozytorium. Typowe sekrety — m.in. `.env`, klucze prywatne, `.ssh`, keystore'y oraz drzewa `credentials*` i `secrets*` — są odfiltrowywane centralną polityką.
+Context includes a bounded diff and repository info. Common secrets — `.env`,
+private keys, `.ssh`, keystores, and `credentials*` / `secrets*` trees — are
+dropped by the shared path filter.
 
-> Filtr bezpieczeństwa zmniejsza ryzyko, ale nie zastępuje kontroli człowieka. Przed wysłaniem danych do zewnętrznego modelu zawsze sprawdź zakres zmian.
+> The filter reduces risk; it does not replace a human check. Review the
+> selected paths before sending them to an external model.
 
-### Interaktywne review
+### Interactive review
 
 ```bash
 gtask review
 ```
 
-`fzf` pozwala wybrać pliki. Bez interaktywnego terminala komenda kończy się
-błędem i nie uruchamia AI.
+`fzf` selects files. Without an interactive terminal the command fails and
+does not start AI.
 
-### Jawne review wszystkich bezpiecznych zmian
+### Review every path that passed the filter
 
 ```bash
 gtask review -- --all
 ```
 
-`--all` jest świadomą zgodą na przekazanie wszystkich zmian, które przeszły filtr ścieżek wrażliwych. Używaj go dopiero po sprawdzeniu `git status` i `gtask changes`.
+`--all` is an explicit opt-in for every remaining change. Use it after
+`git status` and `gtask changes`.
 
-Jeśli `DEV_AI_REVIEW_COMMAND` nie jest ustawione, Dev Harness wypisze prompt lokalnie zamiast wysyłać go do procesu AI.
+If `DEV_AI_REVIEW_COMMAND` is unset, Dev Harness prints the prompt locally
+instead of sending it to an AI process.
 
-## 8. Remember — notatki
+## 8. Remember — notes
 
-Notatki są zapisywane w trzech katalogach:
+Notes land in three directories:
 
 ```text
-Notes/    zwykłe notatki
-Daily/    zapis tego, co wydarzyło się dzisiaj
-Weekly/   podsumowania tygodnia
+Notes/    ordinary notes
+Daily/    what happened today
+Weekly/   weekly summaries
 ```
 
-### Zwykła notatka
+### Ordinary note
 
 ```bash
-gtask note -- "Pomysł na uproszczenie retry policy"
+gtask note -- "Idea for simplifying the retry policy"
 ```
 
-Notatka trafia pod root `Notes/`. Jeżeli polecenie uruchomisz w repozytorium, otrzyma metadane projektu wynikające z nazwy katalogu głównego Git.
+The note is created under `Notes/`. Run from a repository and it also gets
+project metadata from the Git root directory name.
 
-### Dziennik dnia
+### Daily entry
 
 ```bash
-gtask day -- "Naprawiłem timeout płatności i dodałem test regresyjny"
+gtask day -- "Fixed the payment timeout and added a regression test"
 ```
 
-Tekst jest dopisywany do dzisiejszej notatki. W Obsidianie skonfiguruj core plugin Daily notes tak, aby używał katalogu `Daily/`.
+Text is appended to today's note. Point Obsidian's Daily notes plugin at
+`Daily/`.
 
-### Podsumowanie tygodnia
+### Weekly summary
 
 ```bash
-gtask week -- "Domknąłem migrację płatności; zostało monitorowanie produkcji"
+gtask week -- "Finished the payments migration; production monitoring remains"
 ```
 
-Tygodniowe wpisy są przechowywane pod rootem `Weekly/`.
+Weekly entries live under `Weekly/`.
 
-### Tagi i właściwości
+### Tags and properties
 
-Tag opisuje temat, a nie stan pracy. Przykłady dobrych tagów:
+A tag names a topic, not work status. Useful tags:
 
 ```text
 java
@@ -363,42 +372,44 @@ kafka
 architecture
 ```
 
-Pola `project`, `status`, `priority`, `created` i `completed` są właściwościami Obsidiana — nie duplikuj ich jako tagów. Dzięki temu Bases może filtrować zadania po stabilnych polach, a tagi pozostają użyteczne tematycznie.
+`project`, `status`, `priority`, `created`, and `completed` are Obsidian
+properties. Do not duplicate them as tags. Bases can then filter on stable
+fields, and tags stay topical.
 
-## 9. TODO — jedno zadanie, jeden plik
+## 9. TODO — one task, one file
 
-TODO są globalnymi notatkami Markdown pod:
+TODOs are global Markdown notes under:
 
 ```text
-TODO/<rok>/<miesiąc>/<timestamp>-<slug>.md
+TODO/<year>/<month>/<timestamp>-<slug>.md
 ```
 
-Utworzenie TODO wymaga repozytorium Git, ponieważ jego nazwa staje się wartością `project`.
+Creating a TODO requires a Git repository; the root name becomes `project`.
 
 ```bash
-gtask todo -- "Sprawdzić retry policy"          # domyślnie P2
-gtask todo -- p0 "Naprawić wyciek danych"
-gtask todo -- p1 "Przygotować plan migracji"
-gtask todo -- p3 "Posprzątać nazwy testów"
+gtask todo -- "Check retry policy"          # P2 by default
+gtask todo -- p0 "Fix data leak"
+gtask todo -- p1 "Prepare migration plan"
+gtask todo -- p3 "Clean up test names"
 ```
 
-Priorytety:
+Priorities:
 
 ```text
-P0  krytyczny
-P1  wysoki
-P2  średni — domyślny
-P3  niski
+P0  critical
+P1  high
+P2  medium — default
+P3  low
 ```
 
-Listowanie bieżącego projektu:
+List the current project:
 
 ```bash
 gtask todo
 gtask todo -- p1
 ```
 
-Listowanie całego vaulta:
+List the whole vault:
 
 ```bash
 gtask todos
@@ -406,7 +417,7 @@ gtask todos -- p0
 gtask todos -- done
 ```
 
-Zakończenie i ponowne otwarcie zadania:
+Complete or reopen:
 
 ```bash
 gtask done
@@ -414,13 +425,14 @@ gtask done -- p0
 gtask reopen
 ```
 
-Picker wybiera istniejącą notatkę. Zmieniają się wyłącznie właściwości `status` i `completed`; plik zachowuje ścieżkę, więc linki w Obsidianie pozostają stabilne.
+The picker selects an existing note. Only `status` and `completed` change; the
+path stays the same, so Obsidian links remain valid.
 
-Przykładowe właściwości TODO:
+Example TODO properties:
 
 ```yaml
 type: todo
-title: Naprawić retry policy
+title: Fix retry policy
 status: open
 priority: p1
 project: payments
@@ -431,42 +443,43 @@ tags:
   - resilience
 ```
 
-## 10. Przykładowy dzień pracy
+## 10. Example workday
 
 ```bash
-# Znajdź projekt
+# Find the project
 cproj
 
-# Utwórz izolowane środowisko zadania
+# Isolated task environment
 gtask wt -- feature/retry-policy
 cwt
 
-# Pracuj przy użyciu lokalnych poleceń projektu
+# Project-local commands
 task test
 
-# Zobacz zakres zmian i wybierz pliki do review
+# Inspect the change set and review selected files
 gtask changes
 gtask review
 
-# Zapisz rezultat dnia i kolejne działanie
-gtask day -- "Dodałem retry z backoffem i test scenariusza timeout"
-gtask todo -- p1 "Sprawdzić metryki retry na środowisku testowym"
+# Record the day and the next action
+gtask day -- "Added retry with backoff and a timeout-scenario test"
+gtask todo -- p1 "Check retry metrics in the test environment"
 
-# Następnego dnia wróć jednym poleceniem
+# Next day, one command back
 dirty
 why
 focus p1
 ```
 
-## 11. Dodaj własne ogólne narzędzie
+## 11. Add a personal global tool
 
-Nie edytuj `~/.dev-harness`, bo aktualizacja może zastąpić zarządzane pliki. Dodaj prywatny task do:
+Do not edit `~/.dev-harness`; an update may replace managed files. Add a
+personal task to:
 
 ```text
 ~/.config/dev-harness/Taskfile.yml
 ```
 
-Przykład:
+Example:
 
 ```yaml
 version: '3'
@@ -479,101 +492,101 @@ tasks:
       - your-command-here
 ```
 
-Uruchomienie:
+Run it:
 
 ```bash
 gtask ports
 ```
 
-Aby task był widoczny w palecie, dodaj wiersz rozdzielony tabulatorami do:
+To show it in the palette, add a tab-separated row to:
 
 ```text
 ~/.config/dev-harness/palette.tsv
 ```
 
 ```text
-ports<TAB>show listening ports<TAB>network porty sockets
+ports<TAB>show listening ports<TAB>network ports sockets
 ```
 
-Typ rozszerzenia zależy od działania:
+Pick the extension type by what it does:
 
-- alias — skrócenie jednego polecenia;
-- funkcja Bash — operacja musi zmienić bieżący shell, np. `cd`;
-- globalny task — ogólne, odkrywalne narzędzie;
-- skrypt — logika wieloetapowa;
-- lokalny Taskfile projektu — build, test, run, deploy i release.
+- alias — shorten one command
+- Bash function — the operation must change the current shell, for example `cd`
+- global task — a general, discoverable tool
+- script — multi-step logic
+- project Taskfile — build, test, run, deploy, and release
 
-Wbudowany przewodnik pokażesz poleceniem:
+Show the built-in guide:
 
 ```bash
 gtask extend
 ```
 
-## 12. Aktualizacja, diagnostyka i odinstalowanie
+## 12. Update, diagnose, uninstall
 
-Aktualizacja z nowego katalogu źródeł lub wydania:
+Update from a new source directory or release:
 
 ```bash
 ./install.sh update
 ```
 
-Podgląd operacji bez zapisu:
+Preview without writing:
 
 ```bash
 ./install.sh --dry-run --configure-shell
 ./install.sh uninstall --dry-run
 ```
 
-Odinstalowanie usuwa tylko pliki zapisane w manifeście instalacji:
+Uninstall removes only files recorded in the install manifest:
 
 ```bash
 ./install.sh uninstall
 ```
 
-Usunięcie znanych plików konfiguracji osobistej:
+Also remove known personal config files:
 
 ```bash
 ./install.sh uninstall --purge-config
 ```
 
-Nieznane pliki w katalogu konfiguracji, notatki i vault Obsidiana pozostają zachowane.
+Unknown files in the config directory, notes, and the Obsidian vault stay.
 
-## Ściąga
+## Cheat sheet
 
 ```bash
-gtask                    # paleta
-gtask help               # mapa workflow
-gtask aliases            # aliasy
-resume                   # wróć do pracy
-gr                       # root bieżącego repozytorium
-.. / ... / ....          # poziom wyżej
--                        # poprzedni katalog
+gtask                    # palette
+gtask help               # workflow map
+gtask aliases            # aliases
+resume                   # return to recent work
+gr                       # current repository root
+.. / ... / ....          # up one or more directories
+-                        # previous directory
 ll / la                  # listing
-mkcd DIR                 # utwórz katalog i wejdź
-dirty                    # przejdź do repozytorium ze zmianami
-why                      # wyjaśnij bieżący kontekst
-handoff --copy           # skopiuj bezpieczny kontekst przekazania
-standup / standup --copy # pokaż / skopiuj status
-standup --day            # dopisz status do Daily
-focus p0                 # wybierz TODO i przejdź do projektu
-cproj / oproj            # projekt: cd / VS Code
-cwork / cvault           # przejdź do workplace / vaulta
-cwt / owt                # worktree: cd / VS Code
-gtask open               # wybierz plik pod bieżącym katalogiem
-gtask changed            # wybierz zmieniony plik
-gtask search -- TEXT     # szukaj w DEV_WORKPLACE
-gtask semantic -- TEXT   # szukaj po znaczeniu
-gtask index              # zbuduj indeks semantyczny
-gtask wt -- BRANCH       # utwórz worktree
-gtask context            # wybierz lokalny kontekst
-gtask review             # interaktywne AI review
-gtask review -- --all    # jawnie wszystkie bezpieczne zmiany
-gtask note -- TITLE      # zwykła notatka
-gtask day -- TEXT        # wpis dzienny
-gtask week -- TEXT       # wpis tygodniowy
-gtask todo -- p1 TEXT    # nowe TODO
-gtask todo               # TODO projektu
-gtask todos              # TODO całego vaulta
-gtask done / reopen      # zakończ / otwórz ponownie
-gtask doctor             # diagnostyka
+mkcd DIR                 # create a directory and cd into it
+dirty                    # jump to a dirty repository
+why                      # explain current context
+handoff --copy           # copy filtered handoff context
+standup / standup --copy # show / copy status
+standup --day            # append status to Daily
+focus p0                 # pick a TODO and cd to its project
+cproj / oproj            # project: cd / editor
+cwork / cvault           # workplace / vault
+cwt / owt                # worktree: cd / editor
+gtask open               # pick a file under the current directory
+gtask changed            # pick a changed file
+gtask search -- TEXT     # search DEV_WORKPLACE
+gtask semantic -- TEXT   # search by meaning
+gtask index              # build the semantic index
+gtask wt -- BRANCH       # create a worktree
+gtask context            # pick local context
+gtask review             # interactive AI review
+gtask review -- --all    # every remaining filtered change
+gtask note -- TITLE      # ordinary note
+gtask day -- TEXT        # daily entry
+gtask week -- TEXT       # weekly entry
+gtask todo -- p1 TEXT    # new TODO
+gtask todo               # project TODOs
+gtask todos              # vault TODOs
+gtask done / reopen      # complete / reopen
+gtask doctor             # diagnostics
 ```

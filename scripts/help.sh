@@ -153,7 +153,7 @@ show_extend() {
     "   $HOME/.config/dev-harness/palette.tsv" \
     '' \
     '   Add one tab-separated line:' \
-    '   ports<TAB>show listening ports<TAB>network porty sockets' \
+    '   ports<TAB>show listening ports<TAB>network ports sockets' \
     '' \
     '   Columns: task name, visible description, hidden search keywords.' \
     '' \

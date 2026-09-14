@@ -3,11 +3,14 @@ set -euo pipefail
 
 test_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root="$(dirname "$test_dir")"
-test_environment="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-test-runner.XXXXXX")"
+TMPDIR="${TMPDIR:-/tmp}"
+TMPDIR="${TMPDIR%/}"
+export TMPDIR
+test_environment="$(mktemp -d "$TMPDIR/dev-harness-test-runner.XXXXXX")"
 
 cleanup() {
   case "$test_environment" in
-    "${TMPDIR:-/tmp}"/dev-harness-test-runner.*) rm -rf -- "$test_environment" ;;
+    *dev-harness-test-runner.*) rm -rf -- "$test_environment" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_environment" >&2 ;;
   esac
 }

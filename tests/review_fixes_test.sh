@@ -6,7 +6,7 @@ test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-review-fixes-test.XXXXXX")"
 
 cleanup() {
   case "$test_root" in
-    "${TMPDIR:-/tmp}"/dev-harness-review-fixes-test.*) rm -rf -- "$test_root" ;;
+    *dev-harness-review-fixes-test.*) rm -rf -- "$test_root" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_root" >&2 ;;
   esac
 }
@@ -272,13 +272,13 @@ test_cproj_keeps_editor_output_out_of_path_selection() {
         cd "$START_DIRECTORY"
         status=0
         cproj || status=$?
-        printf "RESULT_STATUS=%s\nRESULT_DIRECTORY=%s\n" "$status" "$PWD"
+        printf "RESULT_STATUS=%s\nRESULT_DIRECTORY=%s\n" "$status" "$(pwd -P)"
       ' 2>&1
   )"
 
   assert_contains "$output" 'EDITOR RESPONSE'
   assert_contains "$output" 'RESULT_STATUS=0'
-  assert_contains "$output" "RESULT_DIRECTORY=$fixture"
+  assert_contains "$output" "RESULT_DIRECTORY=$(cd "$fixture" && pwd -P)"
   assert_not_contains "$output" 'No such file or directory'
 }
 
@@ -308,13 +308,13 @@ test_cwt_keeps_editor_output_out_of_path_selection() {
         cd "$START_DIRECTORY"
         status=0
         cwt || status=$?
-        printf "RESULT_STATUS=%s\nRESULT_DIRECTORY=%s\n" "$status" "$PWD"
+        printf "RESULT_STATUS=%s\nRESULT_DIRECTORY=%s\n" "$status" "$(pwd -P)"
       ' 2>&1
   )"
 
   assert_contains "$output" 'EDITOR RESPONSE'
   assert_contains "$output" 'RESULT_STATUS=0'
-  assert_contains "$output" "RESULT_DIRECTORY=$repo"
+  assert_contains "$output" "RESULT_DIRECTORY=$(cd "$repo" && pwd -P)"
   assert_not_contains "$output" 'No such file or directory'
 }
 
@@ -395,7 +395,7 @@ test_palette_offers_the_file_picker_outside_git() {
 
   output="$(
     cd "$workspace"
-    PATH="$fake_bin:$PATH" DEV_WORKPLACE= bash "$source_dir/scripts/palette.sh" select
+    PATH="$fake_bin:$PATH" DEV_WORKPLACE='' bash "$source_dir/scripts/palette.sh" select
   )"
 
   assert_equals "$output" open

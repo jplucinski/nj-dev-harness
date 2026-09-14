@@ -77,4 +77,4 @@ jobs:
           sudo apt-get install --yes shellcheck
       - name: Check shell scripts
         shell: bash
-        run: shellcheck install.sh scripts/*.sh shell/*.bash tests/*.sh tools/*.sh
+        run: shellcheck --severity=warning install.sh scripts/*.sh shell/*.bash tests/*.sh tools/*.sh

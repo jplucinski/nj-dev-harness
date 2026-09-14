@@ -6,7 +6,7 @@ test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-obsidian-test.XXXXXX")"
 
 cleanup() {
   case "$test_root" in
-    "${TMPDIR:-/tmp}"/dev-harness-obsidian-test.*) rm -rf -- "$test_root" ;;
+    *dev-harness-obsidian-test.*) rm -rf -- "$test_root" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_root" >&2 ;;
   esac
 }
@@ -262,7 +262,7 @@ test_completion_and_reopen_only_change_status_and_completed() {
   : > "$state/files/TODO/TODO.base"
   : > "$log"
 
-  run_obsidian "$repo" "$bin" "$state" "$log" done >/dev/null
+  run_obsidian "$repo" "$bin" "$state" "$log" "done" >/dev/null
   mutations="$(grep -E '^(create|append|daily:append|property:set|property:remove)' "$log" || true)"
   expected="$(printf 'property:set\tname=status\tvalue=done\ttype=text\tpath=%s\t\nproperty:set\tname=completed\tvalue=2026-09-02T12:34:56+02:00\ttype=datetime\tpath=%s\t' "$path" "$path")"
   assert_equals "$mutations" "$expected"

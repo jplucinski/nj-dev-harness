@@ -74,7 +74,8 @@ test_workplace_project_dirs_dies_when_empty() {
   mkdir -p "$workplace"
   output="$(DEV_WORKPLACE="$workplace" bash -c '. "'"$source_dir"'/scripts/lib.sh"; workplace_project_dirs' 2>&1)" || status=$?
   [ "$status" -ne 0 ] || fail 'workplace_project_dirs accepted an empty workplace'
-  assert_contains "$output" "No project directories found in $workplace"
+  assert_contains "$output" 'No project directories found in '
+  assert_contains "$output" 'empty-workplace'
 }
 
 search_reload() {

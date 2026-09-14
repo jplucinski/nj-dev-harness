@@ -35,6 +35,13 @@ assert_repo_under_test_root() {
   [[ "$actual" == *"$relative" ]] || fail "Expected path to contain '$relative', got '$actual'"
 }
 
+install_clipboard_stub() {
+  local dir="$1"
+  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$dir/pbcopy"
+  cp "$dir/pbcopy" "$dir/clip.exe"
+  chmod +x "$dir/pbcopy" "$dir/clip.exe"
+}
+
 create_repo() {
   local path="$1"
   mkdir -p "$path"
@@ -423,10 +430,8 @@ test_ctrl_y_copies_resume_context() {
     '#!/usr/bin/env bash' \
     'IFS= read -r first' \
     'printf "ctrl-y\n%s\n" "$first"' > "$fake_bin/fzf"
-  printf '%s\n' \
-    '#!/usr/bin/env bash' \
-    'cat > "$CLIP_LOG"' > "$fake_bin/clip.exe"
-  chmod +x "$fake_bin/atuin" "$fake_bin/fzf" "$fake_bin/clip.exe"
+  chmod +x "$fake_bin/atuin" "$fake_bin/fzf"
+  install_clipboard_stub "$fake_bin"
 
   PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_MAIN_BRANCH=main CLIP_LOG="$clip_log" \
     bash "$source_dir/scripts/resume.sh" manage >/dev/null 2>&1

@@ -27,6 +27,13 @@ assert_contains() {
   [[ "$haystack" == *"$needle"* ]] || fail "Expected value to contain: $needle"
 }
 
+install_clipboard_stub() {
+  local dir="$1"
+  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$dir/pbcopy"
+  cp "$dir/pbcopy" "$dir/clip.exe"
+  chmod +x "$dir/pbcopy" "$dir/clip.exe"
+}
+
 create_repo() {
   local path="$1"
   mkdir -p "$path"
@@ -321,9 +328,9 @@ test_handoff_prints_and_copies_the_same_secret_filtered_context() {
   printf 'secret jks\n' > "$repo/development.jks"
   printf 'secret key\n' > "$repo/id_ed25519"
   printf 'secret nested\n' > "$repo/secrets/config.yml"
-  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$fake_bin/clip.exe"
   printf '%s\n' '#!/usr/bin/env bash' ': > "$AI_MARKER"' > "$fake_bin/ai-capture"
-  chmod +x "$fake_bin/clip.exe" "$fake_bin/ai-capture"
+  chmod +x "$fake_bin/ai-capture"
+  install_clipboard_stub "$fake_bin"
 
   default_output="$(
     cd "$repo"
@@ -355,8 +362,7 @@ test_handoff_rejects_invalid_options_before_side_effects() {
   local clip_log="$test_root/handoff-invalid/clipboard.txt" output status arguments
   create_repo "$repo"
   mkdir -p "$fake_bin"
-  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$fake_bin/clip.exe"
-  chmod +x "$fake_bin/clip.exe"
+  install_clipboard_stub "$fake_bin"
 
   for arguments in '--unknown' '--copy --copy' 'text'; do
     rm -f -- "$clip_log"
@@ -462,8 +468,7 @@ test_standup_copy_and_day_use_the_exact_report() {
   create_fake_obsidian "$bin"
   setup_obsidian_state "$state" "$rows"
   : > "$log"
-  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$bin/clip.exe"
-  chmod +x "$bin/clip.exe"
+  install_clipboard_stub "$bin"
 
   expected="$(
     cd "$repo"
@@ -502,8 +507,7 @@ test_standup_rejects_invalid_actions_before_side_effects() {
   create_repo "$repo"
   create_fake_obsidian "$bin"
   setup_obsidian_state "$state" "$rows"
-  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$bin/clip.exe"
-  chmod +x "$bin/clip.exe"
+  install_clipboard_stub "$bin"
 
   for arguments in '--copy --day' '--copy --copy' '--day --day' '--unknown'; do
     : > "$log"

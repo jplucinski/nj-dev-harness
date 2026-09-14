@@ -58,7 +58,7 @@ collect_candidates() {
       add_candidate "$rank" "${activity:-recent}" "$(to_shell_path "$directory")"
       rank=$((rank + 1))
     done < <(atuin search --limit 200 --format $'{relativetime}\t{directory}' '*' 2>/dev/null \
-      | awk -F '\t' '!seen[$2]++' || true)
+      | awk -F '\t' 'NF >= 2 && !seen[$2]++ { print $1 "\t" $2 }' || true)
   fi
 
   workplace="${DEV_WORKPLACE:-}"

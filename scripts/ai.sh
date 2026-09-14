@@ -46,15 +46,20 @@ pick_changed_files() {
 
 select_review_files() {
   local input="${DEV_HARNESS_INPUT:-}" option item rows
+  local review_args=()
   review_all=false
-  read -r -a review_args <<<"$input"
-  for option in "${review_args[@]}"; do
-    case "$option" in
-      --all) review_all=true ;;
-      '') ;;
-      *) die "Unknown review option: $option. Use --all for explicit non-interactive review." ;;
-    esac
-  done
+  if [ -n "$input" ]; then
+    read -r -a review_args <<<"$input" || true
+  fi
+  if [ "${#review_args[@]}" -gt 0 ]; then
+    for option in "${review_args[@]}"; do
+      case "$option" in
+        --all) review_all=true ;;
+        '') ;;
+        *) die "Unknown review option: $option. Use --all for explicit non-interactive review." ;;
+      esac
+    done
+  fi
 
   if [ "$review_all" = true ]; then
     picked_files=()
@@ -101,16 +106,21 @@ case "$mode" in
     copy_context=false
     source_mode=files
     use_all=false
-    read -r -a context_args <<<"$input"
-    for context_arg in "${context_args[@]}"; do
-      case "$context_arg" in
-        --copy) copy_context=true ;;
-        --all) use_all=true ;;
-        --staged) source_mode=staged-files ;;
-        '') ;;
-        *) die "Unknown context option: $context_arg" ;;
-      esac
-    done
+    context_args=()
+    if [ -n "$input" ]; then
+      read -r -a context_args <<<"$input" || true
+    fi
+    if [ "${#context_args[@]}" -gt 0 ]; then
+      for context_arg in "${context_args[@]}"; do
+        case "$context_arg" in
+          --copy) copy_context=true ;;
+          --all) use_all=true ;;
+          --staged) source_mode=staged-files ;;
+          '') ;;
+          *) die "Unknown context option: $context_arg" ;;
+        esac
+      done
+    fi
 
     tmp="$(mktemp)"
     trap 'rm -f "$tmp"' EXIT

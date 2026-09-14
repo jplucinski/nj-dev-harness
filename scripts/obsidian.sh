@@ -224,7 +224,8 @@ is_todo_filter_input() {
   local input="$1" token
   local tokens=()
   [ -z "$input" ] && return 0
-  read -r -a tokens <<< "$input"
+  read -r -a tokens <<< "$input" || true
+  [ "${#tokens[@]}" -gt 0 ] || return 0
   for token in "${tokens[@]}"; do
     case "$token" in
       p0|p1|p2|p3|--p0|--p1|--p2|--p3|open|--open|'done'|'--done') ;;
@@ -238,7 +239,10 @@ parse_list_filters() {
   local tokens=()
   list_status=open
   list_priority=""
-  read -r -a tokens <<< "$input"
+  if [ -n "$input" ]; then
+    read -r -a tokens <<< "$input" || true
+  fi
+  [ "${#tokens[@]}" -gt 0 ] || return 0
   for token in "${tokens[@]}"; do
     case "$token" in
       open|--open) list_status=open ;;

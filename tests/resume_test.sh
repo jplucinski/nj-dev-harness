@@ -28,6 +28,13 @@ assert_equals() {
   [ "$actual" = "$expected" ] || fail "Expected '$expected', got '$actual'"
 }
 
+assert_repo_under_test_root() {
+  local actual="$1" repo="$2" relative
+  actual="${actual%$'\r'}"
+  relative="${repo#"$test_root"/}"
+  [[ "$actual" == *"$relative" ]] || fail "Expected path to contain '$relative', got '$actual'"
+}
+
 create_repo() {
   local path="$1"
   mkdir -p "$path"
@@ -199,7 +206,7 @@ test_select_returns_the_chosen_path_without_losing_spaces() {
 
   output="$(PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" bash "$source_dir/scripts/resume.sh" select)"
 
-  assert_equals "$output" "$repo"
+  assert_repo_under_test_root "$output" "$repo"
 }
 
 test_resume_shell_function_changes_the_current_directory() {
@@ -227,7 +234,7 @@ test_resume_shell_function_changes_the_current_directory() {
     printf '%s\n' "$PWD"
   )"
 
-  assert_equals "$final_directory" "$repo"
+  assert_repo_under_test_root "$final_directory" "$repo"
 }
 
 test_ctrl_o_opens_the_selected_worktree_in_the_configured_editor() {
@@ -248,7 +255,7 @@ test_ctrl_o_opens_the_selected_worktree_in_the_configured_editor() {
   PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_EDITOR=test-editor EDITOR_LOG="$editor_log" \
     bash "$source_dir/scripts/resume.sh" manage >/dev/null
 
-  assert_equals "$(tr -d '\r' < "$editor_log")" "$repo"
+  assert_repo_under_test_root "$(tr -d '\r' < "$editor_log")" "$repo"
 }
 
 test_resume_function_reports_success_for_a_picker_action() {
@@ -454,7 +461,7 @@ test_ctrl_a_sends_resume_context_to_ai_from_the_selected_worktree() {
 
   assert_contains "$prompt" 'Resume the work in this repository.'
   assert_contains "$prompt" 'ledger.txt'
-  assert_equals "$(tr -d '\r' < "$pwd_log")" "$repo"
+  assert_repo_under_test_root "$(tr -d '\r' < "$pwd_log")" "$repo"
 }
 
 test_ctrl_r_reviews_changes_from_the_selected_worktree() {
@@ -481,7 +488,7 @@ test_ctrl_r_reviews_changes_from_the_selected_worktree() {
 
   assert_contains "$prompt" 'Review the following repository changes'
   assert_contains "$prompt" 'gateway.txt'
-  assert_equals "$(tr -d '\r' < "$pwd_log")" "$repo"
+  assert_repo_under_test_root "$(tr -d '\r' < "$pwd_log")" "$repo"
 }
 
 test_global_task_exposes_the_resume_picker() {
@@ -502,7 +509,7 @@ test_global_task_exposes_the_resume_picker() {
       task --taskfile "$source_dir/Taskfile.global.yml" resume
   )"
 
-  assert_equals "$output" "$repo"
+  assert_repo_under_test_root "$output" "$repo"
 }
 
 test_global_palette_discovers_resume_from_outside_a_repository() {

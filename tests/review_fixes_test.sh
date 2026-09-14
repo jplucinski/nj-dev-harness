@@ -253,7 +253,12 @@ test_cproj_keeps_editor_output_out_of_path_selection() {
   mkdir -p "$workplace/customer portal" "$fake_bin"
   printf '%s\n' \
     '#!/usr/bin/env bash' \
-    'IFS= read -r first' \
+    'first=""' \
+    'while IFS= read -r line; do' \
+    '  [ -n "$line" ] || continue' \
+    '  first="$line"' \
+    '  break' \
+    'done' \
     'printf "ctrl-o\n%s\n" "$first"' > "$fake_bin/fzf"
   printf '%s\n' \
     '#!/usr/bin/env bash' \
@@ -290,7 +295,12 @@ test_cwt_keeps_editor_output_out_of_path_selection() {
   mkdir -p "$fake_bin"
   printf '%s\n' \
     '#!/usr/bin/env bash' \
-    'IFS= read -r first' \
+    'first=""' \
+    'while IFS= read -r line; do' \
+    '  [ -n "$line" ] || continue' \
+    '  first="$line"' \
+    '  break' \
+    'done' \
     'printf "ctrl-o\n%s\n" "$first"' > "$fake_bin/fzf"
   printf '%s\n' \
     '#!/usr/bin/env bash' \
@@ -554,7 +564,7 @@ test_doctor_reports_the_github_cli_integration() {
 }
 
 test_install_requires_fzf_before_writing() {
-  local fixture="$test_root/install-requires-fzf" fake_bin home output status=0 real_bash real_task real_git
+  local fixture="$test_root/install-requires-fzf" fake_bin home output status=0
   fake_bin="$fixture/bin"
   home="$fixture/home"
   mkdir -p "$fake_bin" "$home"

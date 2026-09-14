@@ -20,7 +20,7 @@ run_prompt() {
 }
 
 pick_changed_files() {
-  local source_mode="${1:-files}" rows selection key item
+  local source_mode="${1:-files}" rows selection item
   picked_files=()
   pick_key=""
   rows="$(bash "$script_dir/changes.sh" "$source_mode")"

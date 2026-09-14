@@ -57,13 +57,32 @@ stage_index_only_path() {
   git -C "$repo" update-index --add --cacheinfo "100644,$blob,$path"
 }
 
+canonical_git_path() {
+  local raw
+  raw="$(git -C "$1" rev-parse --show-toplevel 2>/dev/null | tr -d '\r')"
+  [ -n "$raw" ] || {
+    raw="$(cd "$1" && pwd -P)"
+  }
+  case "$raw" in
+    [A-Za-z]:[\\/]*)
+      if command -v cygpath >/dev/null 2>&1; then
+        cygpath -u "$raw"
+      else
+        printf '%s\n' "$raw"
+      fi
+      ;;
+    *) printf '%s\n' "$raw" ;;
+  esac
+}
+
 test_recent_atuin_directories_are_collapsed_to_one_repository() {
   local workplace="$test_root/work place" repo="$test_root/work place/payments api"
-  local fake_bin="$test_root/fake-bin" output count
+  local fake_bin="$test_root/fake-bin" output count expected_path
   create_repo "$repo"
   mkdir -p "$repo/src/deep" "$fake_bin"
   printf '%s\n' '#!/usr/bin/env bash' 'printf "%b" "$ATUIN_TEST_OUTPUT"' > "$fake_bin/atuin"
   chmod +x "$fake_bin/atuin"
+  expected_path="$(canonical_git_path "$repo")"
 
   output="$(
     PATH="$fake_bin:$PATH" \
@@ -73,7 +92,7 @@ test_recent_atuin_directories_are_collapsed_to_one_repository() {
   )"
 
   assert_contains "$output" $'payments api\tmain\t2 minutes ago\t'
-  count="$(printf '%s\n' "$output" | grep -Fc "$repo" || true)"
+  count="$(printf '%s\n' "$output" | awk -F '\t' -v path="$expected_path" '$1 == "payments api" && $4 == path { n++ } END { print n+0 }')"
   assert_equals "$count" 1
 }
 
@@ -119,7 +138,7 @@ test_workplace_discovery_includes_linked_worktrees() {
 
   assert_contains "$output" $'inventory\tmain\tproject\t'
   assert_contains "$output" $'inventory\tfeature/resume\tworktree\t'
-  assert_contains "$output" "$worktree"
+  assert_contains "$output" "$(canonical_git_path "$worktree")"
 }
 
 test_preview_summarizes_branch_and_working_tree_state() {

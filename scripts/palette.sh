@@ -83,7 +83,7 @@ if obsidian_executable >/dev/null 2>&1; then
   add_row week 'open or append to this week' 'weekly summary'
   add_row todo 'list or create project TODO notes' 'todo task project priority'
   add_row todos 'list TODO notes from the entire vault' 'todos tasks global vault tds'
-  add_row done 'select and complete a TODO note' 'done complete task'
+  add_row 'done' 'select and complete a TODO note' 'done complete task'
   add_row reopen 'select and reopen a completed TODO note' 'reopen open task'
   add_row focus 'select a priority TODO and its project' 'focus priority project foc'
 fi

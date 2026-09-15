@@ -8,8 +8,11 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 json=false
 strict=false
 if [ "$#" -eq 0 ] && [ -n "${DEV_HARNESS_INPUT:-}" ]; then
-  read -r -a doctor_args <<<"$DEV_HARNESS_INPUT"
-  set -- "${doctor_args[@]}"
+  doctor_args=()
+  read -r -a doctor_args <<<"$DEV_HARNESS_INPUT" || true
+  if [ "${#doctor_args[@]}" -gt 0 ]; then
+    set -- "${doctor_args[@]}"
+  fi
 fi
 for arg in "$@"; do
   case "$arg" in

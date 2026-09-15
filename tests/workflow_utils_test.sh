@@ -6,7 +6,7 @@ test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-workflow-utils-test.XXXXXX")
 
 cleanup() {
   case "$test_root" in
-    "${TMPDIR:-/tmp}"/dev-harness-workflow-utils-test.*) rm -rf -- "$test_root" ;;
+    *dev-harness-workflow-utils-test.*) rm -rf -- "$test_root" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_root" >&2 ;;
   esac
 }
@@ -25,6 +25,13 @@ assert_equals() {
 assert_contains() {
   local haystack="$1" needle="$2"
   [[ "$haystack" == *"$needle"* ]] || fail "Expected value to contain: $needle"
+}
+
+install_clipboard_stub() {
+  local dir="$1"
+  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$dir/pbcopy"
+  cp "$dir/pbcopy" "$dir/clip.exe"
+  chmod +x "$dir/pbcopy" "$dir/clip.exe"
 }
 
 create_repo() {
@@ -233,7 +240,7 @@ test_dirty_handles_preview_cancel_clean_and_missing_workplace() {
   printf '%s\n' '#!/usr/bin/env bash' 'exit 130' > "$fake_bin/fzf"
   chmod +x "$fake_bin/fzf"
 
-  output="$(cd "$current" && DEV_WORKPLACE= bash "$source_dir/scripts/dirty.sh" candidates)"
+  output="$(cd "$current" && DEV_WORKPLACE='' bash "$source_dir/scripts/dirty.sh" candidates)"
   expected_root="$(cd "$current" && pwd -P)"
   assert_contains "$output" "$expected_root"
 
@@ -245,7 +252,7 @@ test_dirty_handles_preview_cancel_clean_and_missing_workplace() {
 
   output="$(
     cd "$current"
-    PATH="$fake_bin:$PATH" DEV_WORKPLACE= bash "$source_dir/scripts/dirty.sh" select
+    PATH="$fake_bin:$PATH" DEV_WORKPLACE='' bash "$source_dir/scripts/dirty.sh" select
   )"
   assert_equals "$output" ''
 
@@ -321,9 +328,9 @@ test_handoff_prints_and_copies_the_same_secret_filtered_context() {
   printf 'secret jks\n' > "$repo/development.jks"
   printf 'secret key\n' > "$repo/id_ed25519"
   printf 'secret nested\n' > "$repo/secrets/config.yml"
-  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$fake_bin/clip.exe"
   printf '%s\n' '#!/usr/bin/env bash' ': > "$AI_MARKER"' > "$fake_bin/ai-capture"
-  chmod +x "$fake_bin/clip.exe" "$fake_bin/ai-capture"
+  chmod +x "$fake_bin/ai-capture"
+  install_clipboard_stub "$fake_bin"
 
   default_output="$(
     cd "$repo"
@@ -355,8 +362,7 @@ test_handoff_rejects_invalid_options_before_side_effects() {
   local clip_log="$test_root/handoff-invalid/clipboard.txt" output status arguments
   create_repo "$repo"
   mkdir -p "$fake_bin"
-  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$fake_bin/clip.exe"
-  chmod +x "$fake_bin/clip.exe"
+  install_clipboard_stub "$fake_bin"
 
   for arguments in '--unknown' '--copy --copy' 'text'; do
     rm -f -- "$clip_log"
@@ -462,8 +468,7 @@ test_standup_copy_and_day_use_the_exact_report() {
   create_fake_obsidian "$bin"
   setup_obsidian_state "$state" "$rows"
   : > "$log"
-  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$bin/clip.exe"
-  chmod +x "$bin/clip.exe"
+  install_clipboard_stub "$bin"
 
   expected="$(
     cd "$repo"
@@ -502,8 +507,7 @@ test_standup_rejects_invalid_actions_before_side_effects() {
   create_repo "$repo"
   create_fake_obsidian "$bin"
   setup_obsidian_state "$state" "$rows"
-  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$bin/clip.exe"
-  chmod +x "$bin/clip.exe"
+  install_clipboard_stub "$bin"
 
   for arguments in '--copy --day' '--copy --copy' '--day --day' '--unknown'; do
     : > "$log"
@@ -809,12 +813,12 @@ test_palette_contextually_exposes_workflow_utilities() {
   )"
   assert_equals "$output" ''
   assert_contains "$(cat "$palette_log")" $'dirty\t'
-  assert_contains "$(cat "$palette_log")" 'dirty brudne zmiany'
+  assert_contains "$(cat "$palette_log")" 'dirty modified changes'
   ! grep -Eq '^(why|handoff|standup|focus)\t' "$palette_log" || fail 'Repository-only palette rows leaked outside Git'
 
   output="$(
     cd "$repo"
-    PATH="$minimal_path" DEV_WORKPLACE= PALETTE_LOG="$palette_log" \
+    PATH="$minimal_path" DEV_WORKPLACE='' PALETTE_LOG="$palette_log" \
       bash "$source_dir/scripts/palette.sh" select
   )"
   assert_equals "$output" ''
@@ -827,12 +831,12 @@ test_palette_contextually_exposes_workflow_utilities() {
   create_fake_obsidian "$bin"
   output="$(
     cd "$test_root"
-    PATH="$minimal_path" DEV_WORKPLACE= PALETTE_LOG="$palette_log" \
+    PATH="$minimal_path" DEV_WORKPLACE='' PALETTE_LOG="$palette_log" \
       bash "$source_dir/scripts/palette.sh" select
   )"
   assert_equals "$output" ''
   assert_contains "$(cat "$palette_log")" $'focus\t'
-  assert_contains "$(cat "$palette_log")" 'focus priorytet skupienie'
+  assert_contains "$(cat "$palette_log")" 'focus priority project foc'
 }
 
 test_help_lists_every_workflow_fast_path_and_task_alias() {

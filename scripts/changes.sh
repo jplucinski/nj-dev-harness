@@ -147,7 +147,7 @@ print_context() {
     git diff --no-ext-diff --unified=3 --cached -- "${context_paths[@]}" || true
     git diff --no-ext-diff --unified=3 -- "${context_paths[@]}" || true
     print_untracked_diffs
-  } | head -n "$max_lines"
+  } | head -n "$max_lines" || true
 }
 
 case "$mode" in

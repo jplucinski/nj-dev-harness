@@ -4,9 +4,10 @@ Dev Harness is a global Taskfile plus Bash utilities for repository navigation,
 Git worktrees, AI context, Docker, and Obsidian. It runs on macOS and Windows
 Git Bash. Build, test, run, deploy, and release commands stay in each project.
 
-Version `0.3.0` is a preview. See [PRD.md](./PRD.md) for requirements and
-[TUTORIAL.md](./TUTORIAL.md) for the Polish tutorial. The static site lives in
-[`docs/site`](./docs/site).
+Version `0.3.0` is a preview. See [PRD.md](./PRD.md) for requirements,
+[TUTORIAL.md](./TUTORIAL.md) for the tutorial, and the
+[GitHub Pages site](https://jplucinski.github.io/nj-dev-harness/).
+Site source lives in [`docs/site`](./docs/site).
 
 ## Quick start
 
@@ -196,13 +197,13 @@ gtask review -- --all
 gtask logs
 gtask shell
 
-gtask note -- "Pomysł na refaktor"
-gtask day -- "Naprawiłem timeout płatności"
-gtask week -- "Domknięto migrację"
-gtask todo -- "Sprawdzić retry policy"
-gtask todo -- p0 "Naprawić wyciek danych"
-gtask todo -- p1 "Sprawdzić retry policy"
-gtask todo -- p3 "Posprzątać nazwy testów"
+gtask note -- "Retry design"
+gtask day -- "Fixed payment timeout"
+gtask week -- "Migration completed"
+gtask todo -- "Check retry policy"
+gtask todo -- p0 "Fix data leak"
+gtask todo -- p1 "Check retry policy"
+gtask todo -- p3 "Clean up test names"
 gtask todo                         # list current-project TODOs
 gtask todo -- p1                   # list current-project P1 TODOs
 gtask todos                        # list TODOs from the entire vault
@@ -298,11 +299,11 @@ To add a personal command to the searchable palette, add a tab-separated row to:
 ```
 
 ```text
-ports<TAB>show listening ports<TAB>network porty sockets
+ports<TAB>show listening ports<TAB>network ports sockets
 ```
 
-The third column contains hidden Polish or English search terms. Built-in entries
-use the same format.
+The third column holds hidden search terms. Built-in entries use the same
+format.
 
 Use an alias to shorten one command, a shell function for operations such as
 `cd`, a global custom task for general utilities, and a script for multi-step
@@ -406,7 +407,7 @@ Each TODO is a standalone Markdown note under `TODO/<year>/<month>/`. Its timest
 
 ```yaml
 type: todo
-title: Naprawić retry policy
+title: Fix retry policy
 status: open
 priority: p1
 project: payments

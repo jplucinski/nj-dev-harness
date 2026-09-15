@@ -31,7 +31,7 @@ assert_file docs/site/styles.css
 assert_file docs/site/app.js
 assert_file .github/workflows/pages.yml
 
-for anchor in find do remember install security; do
+for anchor in find "do" remember install security; do
   assert_contains docs/site/index.html "id=\"$anchor\""
 done
 
@@ -43,7 +43,7 @@ assert_contains docs/site/index.html 'Weekly/'
 assert_contains docs/site/index.html 'TODO/'
 assert_contains docs/site/index.html 'href="tutorial.html"'
 
-for anchor in requirements install configure find do remember todo extend troubleshooting; do
+for anchor in requirements install configure find "do" remember todo extend troubleshooting; do
   assert_contains docs/site/tutorial.html "id=\"$anchor\""
 done
 

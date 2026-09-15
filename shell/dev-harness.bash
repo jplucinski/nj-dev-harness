@@ -61,7 +61,7 @@ mkcd() {
     printf 'usage: mkcd DIR\n' >&2
     return 1
   }
-  mkdir -p -- "$1" && cd -- "$1"
+  mkdir -p -- "$1" && cd -- "$1" || return
 }
 
 unalias gr 2>/dev/null || true
@@ -71,7 +71,7 @@ gr() {
     printf 'Not inside a Git repository.\n' >&2
     return 1
   }
-  cd "$root"
+  cd "$root" || return
 }
 
 unalias resume 2>/dev/null || true
@@ -79,7 +79,7 @@ resume() {
   local selected
   selected="$(bash "$_dev_harness_home/scripts/resume.sh" select)" || return
   [ -n "$selected" ] || return 0
-  cd "$selected"
+  cd "$selected" || return
 }
 
 unalias dirty 2>/dev/null || true
@@ -91,7 +91,7 @@ dirty() {
   }
   selected="$(bash "$_dev_harness_home/scripts/dirty.sh" select)" || return
   [ -n "$selected" ] || return 0
-  cd "$selected"
+  cd "$selected" || return
 }
 
 unalias why handoff standup 2>/dev/null || true
@@ -112,14 +112,14 @@ focus() {
   local selected
   selected="$(bash "$_dev_harness_home/scripts/focus.sh" select "$@")" || return
   [ -n "$selected" ] || return 0
-  cd "$selected"
+  cd "$selected" || return
 }
 
 cproj() {
   local selected
   selected="$(bash "$_dev_harness_home/scripts/project.sh" print)" || return
   [ -n "$selected" ] || return 0
-  cd "$selected"
+  cd "$selected" || return
 }
 
 unalias cwork 2>/dev/null || true
@@ -130,7 +130,7 @@ cwork() {
     return 1
   }
   selected="$(bash "$_dev_harness_home/scripts/location.sh" workplace)" || return
-  cd "$selected"
+  cd "$selected" || return
 }
 
 unalias cvault 2>/dev/null || true
@@ -141,7 +141,7 @@ cvault() {
     return 1
   }
   selected="$(bash "$_dev_harness_home/scripts/location.sh" vault)" || return
-  cd "$selected"
+  cd "$selected" || return
 }
 
 oproj() {
@@ -156,7 +156,7 @@ cwt() {
   local selected
   selected="$(bash "$_dev_harness_home/scripts/worktrees.sh" print)" || return
   [ -n "$selected" ] || return 0
-  cd "$selected"
+  cd "$selected" || return
 }
 
 owt() {

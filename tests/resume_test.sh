@@ -4,7 +4,7 @@ set -euo pipefail
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-resume-test.XXXXXX")"
 original_dir="$PWD"
-trap 'cd "$original_dir"; rm -rf -- "$test_root"' EXIT
+trap 'cd "$original_dir" || true; rm -rf -- "$test_root" || true' EXIT
 mkdir -p "$test_root/run"
 cd "$test_root/run"
 
@@ -26,6 +26,20 @@ assert_not_contains() {
 assert_equals() {
   local actual="$1" expected="$2"
   [ "$actual" = "$expected" ] || fail "Expected '$expected', got '$actual'"
+}
+
+assert_repo_under_test_root() {
+  local actual="$1" repo="$2" relative
+  actual="${actual%$'\r'}"
+  relative="${repo#"$test_root"/}"
+  [[ "$actual" == *"$relative" ]] || fail "Expected path to contain '$relative', got '$actual'"
+}
+
+install_clipboard_stub() {
+  local dir="$1"
+  printf '%s\n' '#!/usr/bin/env bash' 'cat > "$CLIP_LOG"' > "$dir/pbcopy"
+  cp "$dir/pbcopy" "$dir/clip.exe"
+  chmod +x "$dir/pbcopy" "$dir/clip.exe"
 }
 
 create_repo() {
@@ -57,13 +71,32 @@ stage_index_only_path() {
   git -C "$repo" update-index --add --cacheinfo "100644,$blob,$path"
 }
 
+canonical_git_path() {
+  local raw
+  raw="$(git -C "$1" rev-parse --show-toplevel 2>/dev/null | tr -d '\r')"
+  [ -n "$raw" ] || {
+    raw="$(cd "$1" && pwd -P)"
+  }
+  case "$raw" in
+    [A-Za-z]:[\\/]*)
+      if command -v cygpath >/dev/null 2>&1; then
+        cygpath -u "$raw"
+      else
+        printf '%s\n' "$raw"
+      fi
+      ;;
+    *) printf '%s\n' "$raw" ;;
+  esac
+}
+
 test_recent_atuin_directories_are_collapsed_to_one_repository() {
   local workplace="$test_root/work place" repo="$test_root/work place/payments api"
-  local fake_bin="$test_root/fake-bin" output count
+  local fake_bin="$test_root/fake-bin" output count expected_path
   create_repo "$repo"
   mkdir -p "$repo/src/deep" "$fake_bin"
   printf '%s\n' '#!/usr/bin/env bash' 'printf "%b" "$ATUIN_TEST_OUTPUT"' > "$fake_bin/atuin"
   chmod +x "$fake_bin/atuin"
+  expected_path="$(canonical_git_path "$repo")"
 
   output="$(
     PATH="$fake_bin:$PATH" \
@@ -73,7 +106,7 @@ test_recent_atuin_directories_are_collapsed_to_one_repository() {
   )"
 
   assert_contains "$output" $'payments api\tmain\t2 minutes ago\t'
-  count="$(printf '%s\n' "$output" | grep -Fc "$repo")"
+  count="$(printf '%s\n' "$output" | awk -F '\t' -v path="$expected_path" '$1 == "payments api" && $4 == path { n++ } END { print n+0 }')"
   assert_equals "$count" 1
 }
 
@@ -119,7 +152,7 @@ test_workplace_discovery_includes_linked_worktrees() {
 
   assert_contains "$output" $'inventory\tmain\tproject\t'
   assert_contains "$output" $'inventory\tfeature/resume\tworktree\t'
-  assert_contains "$output" "$worktree"
+  assert_contains "$output" "$(canonical_git_path "$worktree")"
 }
 
 test_preview_summarizes_branch_and_working_tree_state() {
@@ -180,7 +213,7 @@ test_select_returns_the_chosen_path_without_losing_spaces() {
 
   output="$(PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" bash "$source_dir/scripts/resume.sh" select)"
 
-  assert_equals "$output" "$repo"
+  assert_repo_under_test_root "$output" "$repo"
 }
 
 test_resume_shell_function_changes_the_current_directory() {
@@ -208,7 +241,7 @@ test_resume_shell_function_changes_the_current_directory() {
     printf '%s\n' "$PWD"
   )"
 
-  assert_equals "$final_directory" "$repo"
+  assert_repo_under_test_root "$final_directory" "$repo"
 }
 
 test_ctrl_o_opens_the_selected_worktree_in_the_configured_editor() {
@@ -229,7 +262,7 @@ test_ctrl_o_opens_the_selected_worktree_in_the_configured_editor() {
   PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_EDITOR=test-editor EDITOR_LOG="$editor_log" \
     bash "$source_dir/scripts/resume.sh" manage >/dev/null
 
-  assert_equals "$(tr -d '\r' < "$editor_log")" "$repo"
+  assert_repo_under_test_root "$(tr -d '\r' < "$editor_log")" "$repo"
 }
 
 test_resume_function_reports_success_for_a_picker_action() {
@@ -397,10 +430,8 @@ test_ctrl_y_copies_resume_context() {
     '#!/usr/bin/env bash' \
     'IFS= read -r first' \
     'printf "ctrl-y\n%s\n" "$first"' > "$fake_bin/fzf"
-  printf '%s\n' \
-    '#!/usr/bin/env bash' \
-    'cat > "$CLIP_LOG"' > "$fake_bin/clip.exe"
-  chmod +x "$fake_bin/atuin" "$fake_bin/fzf" "$fake_bin/clip.exe"
+  chmod +x "$fake_bin/atuin" "$fake_bin/fzf"
+  install_clipboard_stub "$fake_bin"
 
   PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_MAIN_BRANCH=main CLIP_LOG="$clip_log" \
     bash "$source_dir/scripts/resume.sh" manage >/dev/null 2>&1
@@ -435,7 +466,7 @@ test_ctrl_a_sends_resume_context_to_ai_from_the_selected_worktree() {
 
   assert_contains "$prompt" 'Resume the work in this repository.'
   assert_contains "$prompt" 'ledger.txt'
-  assert_equals "$(tr -d '\r' < "$pwd_log")" "$repo"
+  assert_repo_under_test_root "$(tr -d '\r' < "$pwd_log")" "$repo"
 }
 
 test_ctrl_r_reviews_changes_from_the_selected_worktree() {
@@ -462,7 +493,7 @@ test_ctrl_r_reviews_changes_from_the_selected_worktree() {
 
   assert_contains "$prompt" 'Review the following repository changes'
   assert_contains "$prompt" 'gateway.txt'
-  assert_equals "$(tr -d '\r' < "$pwd_log")" "$repo"
+  assert_repo_under_test_root "$(tr -d '\r' < "$pwd_log")" "$repo"
 }
 
 test_global_task_exposes_the_resume_picker() {
@@ -483,7 +514,7 @@ test_global_task_exposes_the_resume_picker() {
       task --taskfile "$source_dir/Taskfile.global.yml" resume
   )"
 
-  assert_equals "$output" "$repo"
+  assert_repo_under_test_root "$output" "$repo"
 }
 
 test_global_palette_discovers_resume_from_outside_a_repository() {

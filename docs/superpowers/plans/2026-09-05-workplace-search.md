@@ -538,7 +538,7 @@ Point `live)` to `run_live "$@"`. Delete the “not implemented” die for `live
 `scripts/palette.sh`: inside the existing `DEV_WORKPLACE` directory block (with `projects`/`resume`/`dirty`), add:
 
 ```bash
-  add_row search 'search workplace text' 'szukaj tekst grep rg s workplace'
+  add_row search 'search workplace text' 'search text grep rg s workplace'
 ```
 
 Remove `add_row search ...` from the Git-only block.
@@ -894,7 +894,7 @@ Taskfile:
 Palette workplace block:
 
 ```bash
-  add_row semantic 'search workplace code by meaning' 'semantic grepai szukaj znaczenie sem'
+  add_row semantic 'search workplace code by meaning' 'semantic grepai meaning sem'
   add_row index 'initialize workplace semantic index' 'grepai index ollama embeddings'
 ```
 

@@ -23,7 +23,7 @@ load_workflow_args() {
   if [ "$#" -gt 0 ]; then
     workflow_args=("$@")
   elif [ -n "$input" ]; then
-    read -r -a workflow_args <<< "$input"
+    read -r -a workflow_args <<< "$input" || true
   fi
 }
 
@@ -40,8 +40,9 @@ render_handoff() {
 }
 
 run_handoff() {
-  local action=print root
-  case "${#workflow_args[@]}:${workflow_args[0]:-}" in
+  local action=print root option=""
+  [ "${#workflow_args[@]}" -gt 0 ] && option="${workflow_args[0]}"
+  case "${#workflow_args[@]}:$option" in
     0:) ;;
     1:--copy) action=copy ;;
     *) die "Use 'handoff [--copy]'." ;;
@@ -92,8 +93,9 @@ render_standup() {
 }
 
 run_standup() {
-  local action=print root report
-  case "${#workflow_args[@]}:${workflow_args[0]:-}" in
+  local action=print root report option=""
+  [ "${#workflow_args[@]}" -gt 0 ] && option="${workflow_args[0]}"
+  case "${#workflow_args[@]}:$option" in
     0:) ;;
     1:--copy) action=copy ;;
     1:--day) action=day ;;

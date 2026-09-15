@@ -6,7 +6,7 @@ test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-search-test.XXXXXX")"
 
 cleanup() {
   case "$test_root" in
-    "${TMPDIR:-/tmp}"/dev-harness-search-test.*) rm -rf -- "$test_root" ;;
+    *dev-harness-search-test.*) rm -rf -- "$test_root" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_root" >&2 ;;
   esac
 }
@@ -49,7 +49,7 @@ create_command_wrapper() {
 
 test_workplace_root_requires_config() {
   local output status=0
-  output="$(DEV_WORKPLACE= bash -c '. "'"$source_dir"'/scripts/lib.sh"; workplace_root' 2>&1)" || status=$?
+  output="$(DEV_WORKPLACE='' bash -c '. "'"$source_dir"'/scripts/lib.sh"; workplace_root' 2>&1)" || status=$?
   [ "$status" -ne 0 ] || fail 'workplace_root accepted an empty DEV_WORKPLACE'
   assert_contains "$output" 'Set DEV_WORKPLACE in ~/.config/dev-harness/config.env.'
 }
@@ -74,7 +74,8 @@ test_workplace_project_dirs_dies_when_empty() {
   mkdir -p "$workplace"
   output="$(DEV_WORKPLACE="$workplace" bash -c '. "'"$source_dir"'/scripts/lib.sh"; workplace_project_dirs' 2>&1)" || status=$?
   [ "$status" -ne 0 ] || fail 'workplace_project_dirs accepted an empty workplace'
-  assert_contains "$output" "No project directories found in $workplace"
+  assert_contains "$output" 'No project directories found in '
+  assert_contains "$output" 'empty-workplace'
 }
 
 search_reload() {
@@ -191,7 +192,7 @@ test_palette_hides_search_without_workplace() {
   (
     cd "$fixture/plain"
     PATH="$bin:$(dirname "$(command -v git)"):/usr/bin:/bin" \
-      DEV_WORKPLACE= PALETTE_LOG="$palette_log" \
+      DEV_WORKPLACE='' PALETTE_LOG="$palette_log" \
       bash "$source_dir/scripts/palette.sh" select || true
   )
   if grep -Eq '^search\t' "$palette_log"; then
@@ -380,7 +381,7 @@ test_semantic_empty_query_exits_without_search() {
   fake_bin="$workplace/bin"
   log="$workplace/grepai.log"
   install_fake_grepai "$fake_bin" "$log" has-index
-  PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_HARNESS_INPUT= \
+  PATH="$fake_bin:$PATH" DEV_WORKPLACE="$workplace" DEV_HARNESS_INPUT='' \
     bash "$source_dir/scripts/search.sh" semantic </dev/null || status=$?
   [ "$status" -eq 0 ] || fail 'empty semantic query should exit 0'
   if grep -q 'search' "$log" 2>/dev/null; then

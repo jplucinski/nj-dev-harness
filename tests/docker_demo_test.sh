@@ -7,7 +7,7 @@ test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-docker-demo-test.XXXXXX")"
 
 cleanup() {
   case "$test_root" in
-    "${TMPDIR:-/tmp}"/dev-harness-docker-demo-test.*) rm -rf -- "$test_root" ;;
+    *dev-harness-docker-demo-test.*) rm -rf -- "$test_root" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_root" >&2 ;;
   esac
 }

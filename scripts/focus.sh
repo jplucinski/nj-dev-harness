@@ -24,7 +24,7 @@ load_focus_args() {
   if [ "$#" -gt 0 ]; then
     focus_args=("$@")
   elif [ -n "$input" ]; then
-    read -r -a focus_args <<< "$input"
+    read -r -a focus_args <<< "$input" || true
   fi
 }
 
@@ -162,7 +162,11 @@ select_candidate() {
 case "$mode" in
   candidates)
     load_focus_args "$@"
-    parse_priority "${focus_args[@]}"
+    if [ "${#focus_args[@]}" -gt 0 ]; then
+      parse_priority "${focus_args[@]}"
+    else
+      parse_priority
+    fi
     print_candidates
     ;;
   preview)
@@ -170,7 +174,11 @@ case "$mode" in
     ;;
   select|manage)
     load_focus_args "$@"
-    parse_priority "${focus_args[@]}"
+    if [ "${#focus_args[@]}" -gt 0 ]; then
+      parse_priority "${focus_args[@]}"
+    else
+      parse_priority
+    fi
     select_candidate
     ;;
   *) die "Unknown focus mode: $mode" ;;

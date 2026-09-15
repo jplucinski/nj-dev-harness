@@ -6,7 +6,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$script_dir/lib.sh"
 
 mode="${1:-print}"
-workplace="$(workplace_root)"
+workplace_root >/dev/null
 need fzf
 
 rows="$(

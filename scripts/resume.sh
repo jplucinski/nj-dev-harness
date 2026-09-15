@@ -46,19 +46,19 @@ add_candidate() {
 }
 
 collect_candidates() {
-  local rank=10 activity directory ignored workplace project_dir worktree_path
+  local rank=10 activity directory workplace project_dir worktree_path
 
   if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     add_candidate 0 current "$PWD"
   fi
 
   if command -v atuin >/dev/null 2>&1; then
-    while IFS=$'\t' read -r activity directory ignored; do
+    while IFS=$'\t' read -r activity directory; do
       [ -n "$directory" ] || continue
       add_candidate "$rank" "${activity:-recent}" "$(to_shell_path "$directory")"
       rank=$((rank + 1))
     done < <(atuin search --limit 200 --format $'{relativetime}\t{directory}' '*' 2>/dev/null \
-      | awk -F '\t' '!seen[$2]++' || true)
+      | awk -F '\t' 'NF >= 2 && !seen[$2]++ { print $1 "\t" $2 }' || true)
   fi
 
   workplace="${DEV_WORKPLACE:-}"

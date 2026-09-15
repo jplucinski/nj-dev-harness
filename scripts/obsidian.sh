@@ -224,10 +224,11 @@ is_todo_filter_input() {
   local input="$1" token
   local tokens=()
   [ -z "$input" ] && return 0
-  read -r -a tokens <<< "$input"
+  read -r -a tokens <<< "$input" || true
+  [ "${#tokens[@]}" -gt 0 ] || return 0
   for token in "${tokens[@]}"; do
     case "$token" in
-      p0|p1|p2|p3|--p0|--p1|--p2|--p3|open|--open|done|--done) ;;
+      p0|p1|p2|p3|--p0|--p1|--p2|--p3|open|--open|'done'|'--done') ;;
       *) return 1 ;;
     esac
   done
@@ -238,11 +239,14 @@ parse_list_filters() {
   local tokens=()
   list_status=open
   list_priority=""
-  read -r -a tokens <<< "$input"
+  if [ -n "$input" ]; then
+    read -r -a tokens <<< "$input" || true
+  fi
+  [ "${#tokens[@]}" -gt 0 ] || return 0
   for token in "${tokens[@]}"; do
     case "$token" in
       open|--open) list_status=open ;;
-      done|--done) list_status=done ;;
+      'done'|'--done') list_status='done' ;;
       p0|--p0) list_priority=p0 ;;
       p1|--p1) list_priority=p1 ;;
       p2|--p2) list_priority=p2 ;;
@@ -328,7 +332,7 @@ query_todo_rows() {
   if ! todo_base_exists; then
     return 0
   fi
-  if [ "$status" = done ]; then view=Done; else view=Open; fi
+  if [ "$status" = 'done' ]; then view=Done; else view=Open; fi
   if ! raw="$(obs base:query path="$todo_base_path" view="$view" format=tsv)"; then
     die "Could not query $todo_base_path. Enable the Obsidian Bases core plugin and verify the Base file."
   fi
@@ -341,7 +345,7 @@ query_todo_rows() {
 filter_and_sort_todo_rows() {
   local rows="$1" project_filter="$2" priority_filter="$3" status="$4"
   [ -n "$rows" ] || return 0
-  if [ "$status" = done ]; then
+  if [ "$status" = 'done' ]; then
     printf '%s\n' "$rows" \
       | awk -F '\t' -v OFS='\t' -v project="$project_filter" -v priority="$priority_filter" \
           '(!project || $3 == project) && (!priority || $4 == priority) { print }' \
@@ -374,12 +378,12 @@ todo_rows() {
 }
 
 print_todo_rows() {
-  local rows="$1" path title item_project item_priority item_status item_created item_completed label
+  local rows="$1" path title item_project item_priority label
   if [ -z "$rows" ]; then
     printf 'No matching TODOs.\n'
     return
   fi
-  while IFS=$'\t' read -r path title item_project item_priority item_status item_created item_completed; do
+  while IFS=$'\t' read -r path title item_project item_priority _ _ _; do
     label="$(printf '%s' "$item_priority" | tr '[:lower:]' '[:upper:]')"
     printf '%-2s  [%-18s] %s  · %s\n' "$label" "$item_project" "$title" "$path"
   done <<<"$rows"
@@ -411,7 +415,7 @@ select_todo_note() {
     printf 'No matching %s TODOs.\n' "$status"
     return 1
   fi
-  if [ "$status" = done ]; then prompt='reopen todo > '; else prompt='complete todo > '; fi
+  if [ "$status" = 'done' ]; then prompt='reopen todo > '; else prompt='complete todo > '; fi
   selection="$(printf '%s\n' "$rows" | fzf \
     --delimiter=$'\t' \
     --with-nth=4,3,2,6 \
@@ -438,7 +442,7 @@ complete_todo_note() {
 
 reopen_todo_note() {
   local input="$1" selection path title
-  selection="$(select_todo_note done "$input")" || {
+  selection="$(select_todo_note 'done' "$input")" || {
     [ -n "$selection" ] && printf '%s\n' "$selection"
     exit 0
   }

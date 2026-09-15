@@ -6,7 +6,7 @@ test_root="$(mktemp -d "${TMPDIR:-/tmp}/dev-harness-worktree-test.XXXXXX")"
 
 cleanup() {
   case "$test_root" in
-    "${TMPDIR:-/tmp}"/dev-harness-worktree-test.*) rm -rf -- "$test_root" ;;
+    *dev-harness-worktree-test.*) rm -rf -- "$test_root" || true ;;
     *) printf 'Refusing unsafe test cleanup: %s\n' "$test_root" >&2 ;;
   esac
 }
@@ -85,7 +85,7 @@ test_new_worktree_has_timestamped_name_and_complete_metadata() {
   mkdir -p "$root"
   root="$(cd "$root" && pwd -P)"
   create_date_wrapper "$fake_bin"
-  base_sha="$(git -C "$repo" rev-parse main^{commit})"
+  base_sha="$(git -C "$repo" rev-parse 'main^{commit}')"
 
   output="$(run_worktree "$repo" '' "$fake_bin" 'feature/receipt')"
   expected_path="$root/inventory-feature-receipt-20260902-123456"

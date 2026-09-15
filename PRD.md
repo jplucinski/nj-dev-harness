@@ -123,7 +123,7 @@ These commands work from any directory:
 
 `help`, `aliases`, and `extend` must not require Git, `fzf`, Obsidian, Docker, or an AI CLI. All are present in the command palette from every directory.
 
-Palette matching covers the command, visible description, aliases, and hidden Polish/English keywords. Personal palette entries may be added as tab-separated `task`, `description`, and `keywords` rows in `~/.config/dev-harness/palette.tsv`.
+Palette matching covers the command, visible description, aliases, and hidden search keywords. Personal palette entries may be added as tab-separated `task`, `description`, and `keywords` rows in `~/.config/dev-harness/palette.tsv`.
 
 Picker controls, where applicable:
 
@@ -334,7 +334,7 @@ The note frontmatter is the task record:
 ```markdown
 ---
 type: todo
-title: Naprawić retry policy
+title: Fix retry policy
 status: open
 priority: p1
 project: payments
@@ -344,9 +344,9 @@ tags:
   - backend
 ---
 
-# Naprawić retry policy
+# Fix retry policy
 
-Opcjonalny opis, linki, komendy i wyniki analizy.
+Optional description, links, commands, and analysis notes.
 ```
 
 Required properties are `type`, `title`, `status`, `priority`, `project`, and
@@ -599,7 +599,7 @@ The MVP is accepted when:
 
 | Risk | Mitigation |
 |---|---|
-| Shell quoting differs across systems | Support macOS and Git Bash explicitly; add fixtures with spaces and Polish characters. |
+| Shell quoting differs across systems | Support macOS and Git Bash explicitly; add fixtures with spaces and non-ASCII characters. |
 | AI vendors use different invocation syntax | Configure complete interactive and stdin commands instead of hard-coding providers. |
 | Global Taskfile conflicts with an existing one | Installer refuses overwrite and prints a one-time flattened include; managed updates never require merging copied tasks. |
 | Obsidian CLI version or PATH differs | `doctor` checks the CLI and Windows redirector; documentation states the minimum installer version. |

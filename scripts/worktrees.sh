@@ -10,36 +10,35 @@ need git
 need fzf
 root="$(repo_root)"
 
+porcelain="$(git worktree list --porcelain)"
+rows=""
+worktree_path=""
+worktree_branch=""
+worktree_head=""
 emit_worktree() {
   local short_branch normalized
   [ -n "${worktree_path:-}" ] || return 0
   normalized="$(to_shell_path "$worktree_path")"
   short_branch="${worktree_branch#refs/heads/}"
   [ -n "$short_branch" ] || short_branch='detached'
-  printf '%s\t%s\t%s\n' "$short_branch" "$normalized" "${worktree_head:0:10}"
+  rows="${rows}${short_branch}"$'\t'"${normalized}"$'\t'"${worktree_head:0:10}"$'\n'
   worktree_path=""
   worktree_branch=""
   worktree_head=""
 }
-
-rows="$({
-  worktree_path=""
-  worktree_branch=""
-  worktree_head=""
-  while IFS= read -r line; do
-    case "$line" in
-      worktree\ *)
-        emit_worktree
-        worktree_path="${line#worktree }"
-        ;;
-      HEAD\ *) worktree_head="${line#HEAD }" ;;
-      branch\ *) worktree_branch="${line#branch }" ;;
-      detached) worktree_branch='detached' ;;
-      '') emit_worktree ;;
-    esac
-  done < <(git worktree list --porcelain)
-  emit_worktree
-})"
+while IFS= read -r line || [ -n "$line" ]; do
+  case "$line" in
+    worktree\ *)
+      emit_worktree
+      worktree_path="${line#worktree }"
+      ;;
+    HEAD\ *) worktree_head="${line#HEAD }" ;;
+    branch\ *) worktree_branch="${line#branch }" ;;
+    detached) worktree_branch='detached' ;;
+    '') emit_worktree ;;
+  esac
+done <<<"$porcelain"
+emit_worktree
 
 [ -n "$rows" ] || die "No Git worktrees found."
 
@@ -72,7 +71,10 @@ open_worktree() {
 }
 
 case "$key" in
-  ctrl-o) open_worktree ;;
+  ctrl-o)
+    open_worktree
+    exit 0
+    ;;
   ctrl-y)
     printf '%s' "$path" | clip_copy
     printf 'Copied: %s\n' "$path" >&2

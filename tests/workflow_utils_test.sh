@@ -787,12 +787,10 @@ test_taskfile_exposes_workflow_tasks_aliases_and_cli_input() {
   assert_contains "$(cat "$log")" "workflow|standup|--day|$(cd "$work" && pwd -P)"
   assert_contains "$(cat "$log")" "focus|manage|p1|$(cd "$work" && pwd -P)"
 
-  list_output="$(task --taskfile "$source_dir/Taskfile.global.yml" --list)"
-  assert_contains "$list_output" 'dirty:'
-  assert_contains "$list_output" 'why:'
-  assert_contains "$list_output" 'handoff:'
-  assert_contains "$list_output" 'standup:'
-  assert_contains "$list_output" 'focus:'
+  list_output="$(task --silent --taskfile "$source_dir/Taskfile.global.yml" --list)"
+  for name in dirty why handoff standup focus; do
+    assert_contains "$list_output" "$name"
+  done
 }
 
 test_palette_contextually_exposes_workflow_utilities() {

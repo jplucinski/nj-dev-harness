@@ -55,6 +55,7 @@ for suite in \
   workflow_utils_test.sh \
   docker_demo_test.sh \
   install_test.sh \
+  shell_test.sh \
   worktree_test.sh \
   obsidian_test.sh \
   release_test.sh \

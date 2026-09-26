@@ -70,10 +70,11 @@ expected_archive_files() {
     demo/Dockerfile \
     demo/entrypoint.sh \
     shell/dev-harness.bash \
+    shell/dev-harness.common.sh \
+    shell/dev-harness.zsh \
     scripts/ai.sh \
     scripts/changes.sh \
     scripts/dirty.sh \
-    scripts/docker.sh \
     scripts/doctor.sh \
     scripts/help.sh \
     scripts/lib.sh \

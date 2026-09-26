@@ -64,8 +64,5 @@ case "$mode" in
       printf 'Not a Git repository.\n'
     fi
     ;;
-  container)
-    docker logs --tail 80 "$target" 2>&1 || true
-    ;;
   *) die "Unknown preview mode: $mode" ;;
 esac

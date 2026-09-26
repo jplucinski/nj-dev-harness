@@ -11,8 +11,14 @@ show_help() {
   printf '%s\n' \
     'Dev Harness · Find → Do → Remember' \
     '' \
-    'Start and discover' \
+    'Start here' \
     '  gtask                 searchable palette; selection is saved to history' \
+    '  resume                return to recent project or worktree context' \
+    '  cproj                 select a project (Enter: cd · Ctrl-O: open · Ctrl-Y: copy)' \
+    '  cwt                   select a worktree (Enter: cd · Ctrl-O: open · Ctrl-X: remove)' \
+    '  lg / ld / k9          lazygit / lazydocker / k9s when installed' \
+    '' \
+    'Discover more' \
     '  gtask help            this workflow cheat sheet' \
     '  gtask aliases         shell, function, and Task shortcuts' \
     '  gtask extend          how to add personal commands' \
@@ -25,25 +31,22 @@ show_help() {
     '  mkcd DIR            mkdir -p DIR and cd into it' \
     '' \
     'Find' \
-    '  resume               select recent project or worktree and cd' \
     '  gtask resume         inspect recent contexts without changing this shell' \
-    '  cproj / oproj         select a project and cd / open it' \
     '  cwork / cvault        cd to the workplace / Obsidian vault path' \
     '  gtask open            select a file below the current directory' \
     '  gtask changed         select a changed file' \
     '  gtask search -- TEXT  search workplace contents' \
-    '  gtask semantic -- TEXT  search workplace code by meaning' \
-    '  gtask index           initialize the workplace semantic index' \
+    '  gtask semantic -- TEXT  search workplace code by meaning (requires grepai)' \
+    '  gtask index           initialize the workplace semantic index (requires grepai)' \
     '' \
     'Do' \
     '  gtask wt -- BRANCH    create a timestamped worktree' \
-    '  cwt / owt             select a worktree and cd / open it' \
+    '  gtask worktrees       inspect or manage worktrees from the current repo' \
     '  gtask changes         summarize changes from the saved base' \
     '  gtask context         select bounded context for AI' \
     '  gtask review          review selected changes with AI (interactive fzf)' \
     '  gtask review -- --all review all filtered changes without the picker' \
     '  gtask ai              start the configured AI CLI' \
-    '  gtask logs / shell    Docker logs / container shell' \
     '' \
     'Remember' \
     '  gtask note -- TITLE   create an ordinary Obsidian note' \
@@ -66,16 +69,26 @@ show_help() {
     '  Read-only defaults; none of these commands starts AI.' \
     '' \
     'Validate' \
-    '  gtask doctor          check installation and configuration' \
-    '  gtask doctor -- --all treat missing optional tools as errors'
+    '  gtask doctor          show core and optional capabilities' \
+    '  gtask doctor -- --all treat invalid configuration as errors'
 }
 
 show_aliases() {
   printf '%s\n' \
     'Dev Harness aliases and fast paths' \
     '' \
-    'Core shell command' \
-    '  gtask    task -g plus palette and Bash/Atuin history integration' \
+    'Core shell commands' \
+    '  gtask    task -g plus palette and shell/Atuin history integration' \
+    '  resume   select recent context and cd' \
+    '  cproj    select project and cd (Ctrl-O opens DEV_EDITOR)' \
+    '  cwt      select worktree and cd (Ctrl-O opens DEV_EDITOR)' \
+    '  lg       lazygit' \
+    '  ld       lazydocker' \
+    '  k9       k9s' \
+    '' \
+    'Deprecated shell commands' \
+    '  oproj    use cproj and press Ctrl-O' \
+    '  owt      use cwt and press Ctrl-O' \
     '' \
     'Shell aliases' \
     '  gs       git status -sb' \
@@ -99,11 +112,6 @@ show_aliases() {
     '  focus    select an open TODO and cd to its project' \
     '  cwork    cd to DEV_WORKPLACE' \
     '  cvault   cd to DEV_OBSIDIAN_VAULT_PATH' \
-    '  resume   select recent context and cd' \
-    '  cproj    select project and cd' \
-    '  oproj    select project and open it' \
-    '  cwt      select worktree and cd' \
-    '  owt      select worktree and open it' \
     '' \
     'Task aliases' \
     '  gtask h          gtask help' \
@@ -158,7 +166,7 @@ show_extend() {
     '   Columns: task name, visible description, hidden search keywords.' \
     '' \
     '3. Add aliases or directory-changing functions' \
-    '   Put personal aliases/functions in ~/.bashrc after sourcing Dev Harness.' \
+    '   Put personal aliases/functions in ~/.bashrc or ~/.zshrc after sourcing Dev Harness.' \
     '' \
     '4. Keep project behavior local' \
     '   Add build, test, run, deploy, and release tasks to that project Taskfile.' \

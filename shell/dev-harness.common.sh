@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Dev Harness shell integration shared by Bash and Zsh adapters.
 
 _dev_harness_home="${DEV_HARNESS_HOME:-$HOME/.dev-harness}"

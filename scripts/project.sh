@@ -14,11 +14,12 @@ rows="$(
     printf '%s\t%s\n' "$(basename "$path")" "$path"
   done < <(workplace_project_dirs)
 )"
+editor_label="${DEV_EDITOR:-code}"
 selected="$(printf '%s\n' "$rows" | fzf \
   --delimiter=$'\t' \
   --with-nth=1 \
   --expect=ctrl-o,ctrl-y \
-  --header='Enter: select · Ctrl-O: VS Code · Ctrl-Y: copy path' \
+  --header="Enter: select · Ctrl-O: $editor_label · Ctrl-Y: copy path" \
   --preview="bash \"$script_dir/preview.sh\" project {2}" \
   --preview-window='right,60%,wrap' \
   --prompt='project > ')" || exit 0

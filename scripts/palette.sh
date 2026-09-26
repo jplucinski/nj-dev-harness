@@ -33,8 +33,10 @@ if [ -n "${DEV_WORKPLACE:-}" ] && [ -d "$(to_shell_path "$DEV_WORKPLACE")" ]; th
   add_row resume 'return to recent project or worktree context' 'resume continue recent context project worktree'
   add_row dirty 'select a dirty repository or worktree' 'dirty modified changes repo worktree'
   add_row search 'search workplace text' 'search text grep rg s workplace'
-  add_row semantic 'search workplace code by meaning' 'semantic grepai meaning sem'
-  add_row index 'initialize workplace semantic index' 'grepai index ollama embeddings'
+  if command -v grepai >/dev/null 2>&1; then
+    add_row semantic 'search workplace code by meaning' 'semantic grepai meaning sem'
+    add_row index 'initialize workplace semantic index' 'grepai index ollama embeddings'
+  fi
   resume_added=true
   dirty_added=true
 elif command -v atuin >/dev/null 2>&1; then
@@ -72,11 +74,6 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   add_row review "review selected changes with AI ($total)" 'review ai diff rv'
 fi
 
-if command -v docker >/dev/null 2>&1; then
-  add_row logs 'select a container and follow logs' 'docker container logs'
-  add_row shell 'select a container and open a shell' 'docker container terminal bash sh'
-fi
-
 if obsidian_executable >/dev/null 2>&1; then
   add_row note 'create an Obsidian note' 'note notes memory'
   add_row day 'open or append to today' 'daily today journal'
@@ -88,7 +85,7 @@ if obsidian_executable >/dev/null 2>&1; then
   add_row focus 'select a priority TODO and its project' 'focus priority project foc'
 fi
 
-add_row doctor 'validate installation and configuration' 'doctor install config health'
+add_row doctor 'show core and optional capabilities' 'doctor install config health capabilities'
 
 custom_palette="${DEV_HARNESS_CUSTOM_PALETTE:-$HOME/.config/dev-harness/palette.tsv}"
 if [ -f "$custom_palette" ]; then

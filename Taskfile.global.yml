@@ -172,18 +172,6 @@ tasks:
     cmds:
       - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/ai.sh" review
 
-  logs:
-    desc: Select a running Docker container and follow logs
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/docker.sh" logs
-
-  shell:
-    desc: Select a running Docker container and open a shell
-    dir: '{{.USER_WORKING_DIR}}'
-    cmds:
-      - bash "${DEV_HARNESS_HOME:-$HOME/.dev-harness}/scripts/docker.sh" shell
-
   note:
     desc: Create and open a normal Obsidian note
     dir: '{{.USER_WORKING_DIR}}'

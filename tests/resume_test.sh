@@ -568,7 +568,7 @@ test_doctor_reports_an_unavailable_configured_resume_command() {
       bash "$source_dir/scripts/doctor.sh" --json
   )" || true
 
-  assert_contains "$output" '"name":"DEV_AI_RESUME_COMMAND","status":"warn"'
+  assert_contains "$output" '"name":"DEV_AI_RESUME_COMMAND","status":"info"'
   assert_contains "$output" 'configured command is unavailable'
 }
 

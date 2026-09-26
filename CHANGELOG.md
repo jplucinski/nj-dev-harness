@@ -9,16 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added workplace-wide live `gtask search` across immediate `DEV_WORKPLACE`
+- Zsh shell integration via `shell/dev-harness.zsh` and shared `shell/dev-harness.common.sh`.
+- Promoted shortcuts `lg`, `ld`, and `k9` for lazygit, lazydocker, and k9s.
+- Capability-grouped `gtask doctor` output for core tools and optional integrations.
+- Workplace-wide live `gtask search` across immediate `DEV_WORKPLACE`
   children, `gtask semantic` / `gtask index` on local `grepai`, and made `rg`
-  and `grepai` required dependencies.
-- Made `gtask open` available outside Git, searching recursively below the
-  current directory, and added `cwork`/`cvault` directory shortcuts.
-- Added the `gr`, `dirty`, `why`, `handoff`, `standup`, and `focus` workflow
+  a required dependency.
+- `gtask open` available outside Git, searching recursively below the
+  current directory, and `cwork`/`cvault` directory shortcuts.
+- The `gr`, `dirty`, `why`, `handoff`, `standup`, and `focus` workflow
   utilities for repository navigation, filtered context handoff, local status summaries,
   and priority-first TODO selection without automatic AI invocation.
-- Added an interactive Docker demo with a prepared sample repository
+- An interactive Docker demo with a prepared sample repository
   and matching README, Markdown tutorial, and GitHub Pages instructions.
+
+### Changed
+
+- `grepai` is optional at install time; `gtask semantic` and `gtask index` still require it at runtime.
+- `cproj` and `cwt` are the primary project and worktree pickers (Ctrl-O opens `DEV_EDITOR`).
+- `oproj` and `owt` remain but print deprecation guidance.
+
+### Removed
+
+- `gtask logs` and `gtask shell` Docker container pickers (use `ld` / lazydocker instead).
 
 ## [0.3.0] - 2026-09-02
 

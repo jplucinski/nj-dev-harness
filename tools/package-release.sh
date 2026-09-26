@@ -48,10 +48,11 @@ source_files=(
   demo/Dockerfile
   demo/entrypoint.sh
   shell/dev-harness.bash
+  shell/dev-harness.common.sh
+  shell/dev-harness.zsh
   scripts/ai.sh
   scripts/changes.sh
   scripts/dirty.sh
-  scripts/docker.sh
   scripts/doctor.sh
   scripts/focus.sh
   scripts/help.sh

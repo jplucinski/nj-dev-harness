@@ -15,16 +15,16 @@ Required:
 - Git
 - `fzf`
 - `rg` (ripgrep)
-- `grepai`
 
 Optional:
 
-- Ollama for local embeddings used by `gtask index` / `gtask semantic`
+- `grepai` and Ollama for `gtask index` / `gtask semantic`
+- lazygit, lazydocker, and k9s (`lg`, `ld`, `k9` shell shortcuts)
 - VS Code with `code` on `PATH`
 - Atuin for a richer recent-context list
 - Obsidian 1.12.7+ with CLI and Bases enabled
 - an AI CLI such as Codex, Claude, Gemini, Copilot CLI, or OpenCode
-- Docker, if you want `gtask logs` and `gtask shell`
+- Docker and lazydocker for container workflows (`ld`)
 
 ## Demo without installing — Docker
 

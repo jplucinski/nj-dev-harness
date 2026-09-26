@@ -45,11 +45,11 @@ Required:
 - Git
 - `fzf`
 - `rg` (ripgrep)
-- `grepai`
 
 Optional feature dependencies:
 
-- Ollama (needed for `gtask index` / `gtask semantic` embeddings)
+- `grepai` and Ollama (needed for `gtask index` / `gtask semantic`)
+- lazygit, lazydocker, and k9s (shell shortcuts `lg`, `ld`, `k9`)
 - the VS Code CLI, Docker, the GitHub CLI, and Atuin
 - `bat` for syntax-highlighted picker previews
 - Obsidian 1.12.7+ with Command line interface and the Bases core plugin enabled
@@ -57,8 +57,7 @@ Optional feature dependencies:
 
 No shipped command currently requires the GitHub CLI. `fzf` is required because
 the default `gtask` command and interactive selectors use it. `rg` is required
-because workplace file pickers and `gtask search` use it. `grepai` is required
-because `gtask semantic` and `gtask index` use it. The installer never installs
+because workplace file pickers and `gtask search` use it. The installer never installs
 third-party binaries.
 
 ## Try the interactive Docker demo
@@ -102,7 +101,8 @@ The installer validates Bash, Task, Git, `fzf`, and `rg` before writing anything
 - installs versioned, managed files in `~/.dev-harness`;
 - creates `~/.config/dev-harness/config.env` only when missing and preserves it on updates;
 - creates a small `$HOME/Taskfile.yml` loader that points at the managed Taskfile;
-- adds an identifiable block to `~/.bashrc` only with `--configure-shell`;
+- adds an identifiable block to `~/.bashrc` and, when `zsh` is available,
+  `~/.zshrc` with `--configure-shell`;
 - warns about missing optional integrations and runs `doctor` after installation.
 
 Updates replace the managed Taskfile without changing the loader:
@@ -138,7 +138,8 @@ If a different global Taskfile already exists, the installer leaves it unchanged
 and prints the include entry to add. It migrates an unchanged older Dev Harness
 Taskfile automatically.
 
-Without `--configure-shell`, add the printed source line to `~/.bashrc` yourself.
+Without `--configure-shell`, add the printed source line to `~/.bashrc` or
+`~/.zshrc` yourself.
 For the first run, restart the terminal, review
 `~/.config/dev-harness/config.env`, and validate the installation with:
 
@@ -154,16 +155,15 @@ gtask help                    # workflow cheat sheet
 gtask aliases                 # all aliases and fast paths
 gtask extend                  # how to add personal commands
 gtask --list                  # all global Task commands
-cproj                         # select project and cd
-oproj                         # select project and open DEV_EDITOR
+cproj                         # select project and cd (Ctrl-O opens DEV_EDITOR)
+lg / ld / k9                  # lazygit / lazydocker / k9s
 cwork                         # cd to DEV_WORKPLACE
 cvault                        # cd to DEV_OBSIDIAN_VAULT_PATH
 .. / ... / ....               # cd up 1 / 2 / 3 directories
 -                             # cd to the previous directory
 ll / la                       # ls -lah / ls -A
 mkcd DIR                      # mkdir -p DIR and cd into it
-cwt                           # select worktree and cd
-owt                           # select worktree and open DEV_EDITOR
+cwt                           # select worktree and cd (Ctrl-O opens DEV_EDITOR)
 resume                        # select recent project/worktree and cd
 gtask resume                  # inspect recent contexts and choose an action
 gr                            # cd to the current Git worktree root
@@ -193,9 +193,6 @@ gtask context -- --staged
 gtask ai
 gtask review
 gtask review -- --all
-
-gtask logs
-gtask shell
 
 gtask note -- "Retry design"
 gtask day -- "Fixed payment timeout"

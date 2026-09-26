@@ -37,7 +37,7 @@ both supported operating systems.
 - Make returning to an interrupted repository or worktree a single action without maintaining a new activity database.
 - Make Git worktree creation safe and conflict-resistant.
 - Build useful, review-oriented Git context for any configured AI CLI.
-- Provide quick access to Docker logs and container shells.
+- Recommend mature TUIs for Git, Docker, and Kubernetes (`lg`, `ld`, `k9`).
 - Support ordinary notes, daily logs, weekly summaries, and TODO items through the official Obsidian CLI.
 - Validate installation and configuration without modifying the machine.
 - Work on macOS and Windows through Git Bash.
@@ -93,8 +93,10 @@ Changing the parent shell directory requires a function:
 ```bash
 mkcd DIR # mkdir -p DIR and cd into it
 resume   # select a recent project or worktree and cd into it
-cproj    # select a project and cd into it
-oproj    # select a project and open it in DEV_EDITOR
+cproj    # select a project and cd into it (Ctrl-O opens DEV_EDITOR)
+lg       # lazygit when installed
+ld       # lazydocker when installed
+k9       # k9s when installed
 ```
 
 ### 7.2 Command palette
@@ -142,8 +144,7 @@ Ctrl-R   review selected changes with AI
 
 | Command | Behavior |
 |---|---|
-| `cproj` | Select an immediate child of `DEV_WORKPLACE` and change the current shell directory. |
-| `oproj` | Select a project and open it with `DEV_EDITOR`. |
+| `cproj` | Select an immediate child of `DEV_WORKPLACE` and change the current shell directory; Ctrl-O opens `DEV_EDITOR`. |
 | `cwork` | Change the current shell directory to `DEV_WORKPLACE`. |
 | `cvault` | Change the current shell directory to `DEV_OBSIDIAN_VAULT_PATH`. |
 | `..` / `...` / `....` | Change directory up 1, 2, or 3 levels. |
@@ -219,9 +220,9 @@ payments-feature-my-change-20260829-143522
 The worktree picker provides:
 
 ```bash
-cwt                 # select a worktree and change directory
-owt                 # select a worktree and open DEV_EDITOR
+cwt                 # select a worktree and change directory (Ctrl-O opens DEV_EDITOR)
 gtask worktrees     # inspect or act on worktrees
+gtask wt            # create a timestamped worktree
 ```
 
 The picker previews status and recent commits. It can copy a path, open
@@ -281,12 +282,9 @@ duplicating secret lists.
 
 ### 8.4 Do: Docker
 
-| Command | Behavior |
-|---|---|
-| `gtask logs` | Select a running container and follow its recent logs. |
-| `gtask shell` | Select a running container and open `bash`, falling back to `sh`. |
-
-Docker Compose commands remain project-specific or are used directly.
+Shell shortcut `ld` launches `lazydocker` when installed. Dev Harness does not
+provide a competing container picker. Docker Compose commands remain
+project-specific or are used directly.
 
 The repository includes a Docker demo that installs Dev Harness as a non-root
 user and creates a sample repository. Its documented run command mounts no host
@@ -389,13 +387,18 @@ gtask doctor -- --json
 
 The validator must check:
 
-- Bash, Task, Git, `fzf`, `rg`, and `grepai` as required dependencies;
+- Bash, Task, Git, `fzf`, and `rg` as required core dependencies;
+- grouped optional capabilities including lazygit, Docker, lazydocker, Kubernetes
+  tools, grepai, Ollama, Obsidian, Atuin, and `gh`;
 - `DEV_WORKPLACE` and relevant directory access;
-- workplace `.grepai/config.yaml` (error if missing) and `.grepai/index.gob` (warn, error with `--all`);
-- optional VS Code, Docker, `gh`, Ollama, Obsidian CLI, and configured AI commands;
+- workplace `.grepai` index state as informational when semantic search is optional;
+- configured AI commands and numeric configuration limits;
 - whether the current directory is a Git repository when repository-specific checks are requested.
 
-Missing required dependencies produce an error. Missing optional integrations produce a warning unless `--all` is used. The validator never installs or changes anything.
+Missing core dependencies produce an error. Missing optional capabilities are
+reported as information, not warnings. `--all` promotes invalid configuration
+to errors but does not treat optional binaries as required. The validator never
+installs or changes anything.
 
 ### 8.7 Install and lifecycle
 
@@ -423,7 +426,7 @@ The installer must:
 - install `$HOME/Taskfile.yml` as a stable, flattened include of `~/.dev-harness/Taskfile.yml` rather than copying all managed tasks there;
 - automatically migrate an unchanged legacy Dev Harness global Taskfile to the stable loader;
 - leave an unrelated existing global Taskfile unchanged and print the one include entry required to connect Dev Harness;
-- edit `~/.bashrc` only when `--configure-shell` is passed, using an identifiable, idempotent managed block;
+- edit `~/.bashrc` and `~/.zshrc` when `--configure-shell` is passed, using identifiable, idempotent managed blocks;
 - run the read-only validator after a successful non-dry-run install or update;
 - remove only manifest-owned files during uninstall and preserve unknown files, personal configuration, notes, and the Obsidian vault;
 - remove known personal configuration files only through the explicit `uninstall --purge-config` option;
@@ -462,8 +465,8 @@ managed Taskfile (~/.dev-harness/Taskfile.yml)
           ↓
 small Bash scripts (~/.dev-harness/scripts)
           ↓
-required: bash · task · git · fzf · rg · grepai
-optional: code · docker · obsidian · ollama · AI CLI
+required: bash · task · git · fzf · rg
+optional: grepai · lazygit · lazydocker · k9s · docker · obsidian · ollama · AI CLI
 ```
 
 Responsibilities:
@@ -582,7 +585,7 @@ The MVP is accepted when:
 ### Phase 3 — AI, Docker, Remember
 
 - vendor-neutral interactive AI and review commands;
-- Docker logs and shell selection;
+- lazydocker shell shortcut (`ld`);
 - Obsidian note, daily, weekly, metadata-backed TODO, completion, and reopen commands;
 - native `TODO.base` view over the TODO metadata model.
 

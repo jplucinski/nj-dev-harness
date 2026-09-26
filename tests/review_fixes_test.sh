@@ -649,8 +649,8 @@ test_doctor_reports_rg_as_required_json_error() {
   assert_contains "$output" '"name":"rg","status":"error"'
 }
 
-test_install_requires_grepai_before_writing() {
-  local fixture="$test_root/install-requires-grepai" fake_bin home output status=0
+test_install_succeeds_without_grepai_on_path() {
+  local fixture="$test_root/install-without-grepai" fake_bin home output status=0
   fake_bin="$fixture/bin"
   home="$fixture/home"
   mkdir -p "$fake_bin" "$home"
@@ -669,14 +669,12 @@ test_install_requires_grepai_before_writing() {
       bash "$source_dir/install.sh" install --dry-run 2>&1
   )" || status=$?
 
-  [ "$status" -ne 0 ] || fail 'Installer accepted a PATH without grepai'
-  [ ! -e "$home/.dev-harness" ] || fail 'Installer wrote ~/.dev-harness before rejecting grepai'
-  [ ! -e "$home/.config/dev-harness" ] || fail 'Installer wrote ~/.config/dev-harness before rejecting grepai'
-  assert_contains "$output" 'Required tool not found in PATH: grepai'
+  [ "$status" -eq 0 ] || fail 'Installer rejected a PATH without grepai'
+  assert_contains "$output" 'Dev Harness install:'
 }
 
-test_doctor_reports_grepai_as_required_json_error() {
-  local fixture="$test_root/doctor-requires-grepai" fake_bin output
+test_doctor_reports_grepai_as_optional_json_info() {
+  local fixture="$test_root/doctor-optional-grepai" fake_bin output
   fake_bin="$fixture/bin"
   mkdir -p "$fake_bin"
   create_command_wrapper "$fake_bin" bash
@@ -693,7 +691,7 @@ test_doctor_reports_grepai_as_required_json_error() {
       bash "$source_dir/scripts/doctor.sh" --json 2>&1
   )" || true
 
-  assert_contains "$output" '"name":"grepai","status":"error"'
+  assert_contains "$output" '"name":"grepai","status":"info"'
 }
 
 install_doctor_command_stubs() {
@@ -710,7 +708,7 @@ install_doctor_command_stubs() {
   chmod +x "$fake_bin/fzf" "$fake_bin/rg" "$fake_bin/grepai"
 }
 
-test_doctor_errors_when_workplace_has_no_grepai_config() {
+test_doctor_reports_missing_grepai_config_as_info() {
   local fixture="$test_root/doctor-grepai-config" fake_bin workplace output
   fake_bin="$fixture/bin"
   workplace="$fixture/workplace"
@@ -722,11 +720,11 @@ test_doctor_errors_when_workplace_has_no_grepai_config() {
       bash "$source_dir/scripts/doctor.sh" --json 2>&1
   )" || true
 
-  assert_contains "$output" '"name":"grepai-config","status":"error"'
-  assert_contains "$output" 'run gtask index'
+  assert_contains "$output" '"name":"grepai-config","status":"info"'
+  assert_contains "$output" 'gtask index'
 }
 
-test_doctor_warns_when_workplace_index_is_missing() {
+test_doctor_reports_missing_workplace_index_as_info() {
   local fixture="$test_root/doctor-grepai-index" fake_bin workplace output
   fake_bin="$fixture/bin"
   workplace="$fixture/workplace"
@@ -738,13 +736,13 @@ test_doctor_warns_when_workplace_index_is_missing() {
     PATH="$fake_bin" DEV_WORKPLACE="$workplace" \
       bash "$source_dir/scripts/doctor.sh" --json 2>&1
   )" || true
-  assert_contains "$output" '"name":"grepai-index","status":"warn"'
+  assert_contains "$output" '"name":"grepai-index","status":"info"'
 
   output="$(
     PATH="$fake_bin" DEV_WORKPLACE="$workplace" \
       bash "$source_dir/scripts/doctor.sh" --json --all 2>&1
   )" || true
-  assert_contains "$output" '"name":"grepai-index","status":"error"'
+  assert_contains "$output" '"name":"grepai-index","status":"info"'
 }
 
 test_context_truncates_large_untracked_files_without_error() {
@@ -815,13 +813,13 @@ test_install_requires_rg_before_writing
 printf 'PASS: installer requires rg before writing\n'
 test_doctor_reports_rg_as_required_json_error
 printf 'PASS: doctor reports rg as a required JSON error\n'
-test_install_requires_grepai_before_writing
-printf 'PASS: installer requires grepai before writing\n'
-test_doctor_reports_grepai_as_required_json_error
-printf 'PASS: doctor reports grepai as a required JSON error\n'
-test_doctor_errors_when_workplace_has_no_grepai_config
-printf 'PASS: doctor errors when workplace has no grepai config\n'
-test_doctor_warns_when_workplace_index_is_missing
-printf 'PASS: doctor warns when workplace index is missing\n'
+test_install_succeeds_without_grepai_on_path
+printf 'PASS: installer succeeds without grepai on PATH\n'
+test_doctor_reports_grepai_as_optional_json_info
+printf 'PASS: doctor reports grepai as optional JSON info\n'
+test_doctor_reports_missing_grepai_config_as_info
+printf 'PASS: doctor reports missing grepai config as info\n'
+test_doctor_reports_missing_workplace_index_as_info
+printf 'PASS: doctor reports missing workplace index as info\n'
 test_context_truncates_large_untracked_files_without_error
 printf 'PASS: context safely truncates large untracked files\n'

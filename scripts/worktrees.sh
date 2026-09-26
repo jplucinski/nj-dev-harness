@@ -6,6 +6,10 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$script_dir/lib.sh"
 
 mode="${1:-manage}"
+ui_mode="$mode"
+if [ "$mode" = cd ]; then
+  mode=manage
+fi
 need git
 need fzf
 root="$(repo_root)"
@@ -42,12 +46,17 @@ emit_worktree
 
 [ -n "$rows" ] || die "No Git worktrees found."
 
+editor_label="${DEV_EDITOR:-code}"
 if [ "$mode" = manage ]; then
   expected_keys='ctrl-o,ctrl-y,ctrl-a,ctrl-x'
-  help_text='Enter: print · Ctrl-O: VS Code · Ctrl-Y: copy · Ctrl-A: AI · Ctrl-X: remove'
+  if [ "$ui_mode" = cd ]; then
+    help_text="Enter: cd here · Ctrl-O: $editor_label · Ctrl-Y: copy · Ctrl-A: AI · Ctrl-X: remove"
+  else
+    help_text="Enter: print path · Ctrl-O: $editor_label · Ctrl-Y: copy · Ctrl-A: AI · Ctrl-X: remove"
+  fi
 else
   expected_keys='ctrl-o,ctrl-y'
-  help_text='Enter: select · Ctrl-O: VS Code · Ctrl-Y: copy path'
+  help_text="Enter: select · Ctrl-O: $editor_label · Ctrl-Y: copy path"
 fi
 
 selection="$(printf '%s\n' "$rows" | fzf \

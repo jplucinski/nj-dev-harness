@@ -11,6 +11,7 @@ install_dir="${DEV_HARNESS_HOME:-$HOME/.dev-harness}"
 config_dir="${DEV_HARNESS_CONFIG_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/dev-harness}"
 global_taskfile="$HOME/Taskfile.yml"
 bashrc="$HOME/.bashrc"
+zshrc="$HOME/.zshrc"
 manifest_name=".dev-harness-manifest"
 
 mode="install"
@@ -41,7 +42,7 @@ Options:
   -h, --help          Show this help
 
 Required tools:
-  bash, task, git, fzf, rg, grepai
+  bash, task, git, fzf, rg
 EOF
 }
 
@@ -192,6 +193,8 @@ validate_source() {
     install.ps1 \
     config/dev-harness.env.example \
     shell/dev-harness.bash \
+    shell/dev-harness.common.sh \
+    shell/dev-harness.zsh \
     scripts/doctor.sh; do
     [ -f "$source_dir/$required" ] || die "Installation source is incomplete: missing $required"
   done
@@ -199,7 +202,7 @@ validate_source() {
 
 validate_required_tools() {
   local tool missing=false
-  for tool in bash task git fzf rg grepai; do
+  for tool in bash task git fzf rg; do
     if ! command -v "$tool" >/dev/null 2>&1; then
       warn "Required tool not found in PATH: $tool"
       missing=true
@@ -238,7 +241,7 @@ stage_managed_files() {
   local stage="$1"
   mkdir -p "$stage/scripts" "$stage/shell" "$stage/config"
   cp "$source_dir"/scripts/*.sh "$stage/scripts/"
-  cp "$source_dir/shell/dev-harness.bash" "$stage/shell/"
+  cp "$source_dir/shell/dev-harness.bash" "$source_dir/shell/dev-harness.common.sh" "$source_dir/shell/dev-harness.zsh" "$stage/shell/"
   cp "$source_dir/config/dev-harness.env.example" "$stage/config/"
   cp "$source_dir/Taskfile.global.yml" "$stage/Taskfile.yml"
   cp "$source_dir/install.sh" "$stage/install.sh"
@@ -324,79 +327,113 @@ install_global_loader() {
 }
 
 shell_source_line() {
-  local quoted
-  printf -v quoted '%q' "$install_dir/shell/dev-harness.bash"
+  local shell_file="$1" quoted
+  printf -v quoted '%q' "$install_dir/shell/$shell_file"
   printf 'source %s' "$quoted"
 }
 
-configure_bashrc() {
-  local source_line
-  source_line="$(shell_source_line)"
+should_configure_bashrc() {
+  [ -f "$bashrc" ] && return 0
+  case "${SHELL:-}" in
+    */bash|bash) return 0 ;;
+  esac
+  return 1
+}
 
-  if [ -f "$bashrc" ] && grep -Fqx "$shell_block_start" "$bashrc" && grep -Fqx "$shell_block_end" "$bashrc"; then
-    say "Shell integration is already present: $bashrc"
+should_configure_zshrc() {
+  command -v zsh >/dev/null 2>&1
+}
+
+configure_shell_rc() {
+  local rc_file="$1" shell_file="$2" source_line marker
+  source_line="$(shell_source_line "$shell_file")"
+  marker="$install_dir/shell/$shell_file"
+
+  if [ -f "$rc_file" ] && grep -Fqx "$shell_block_start" "$rc_file" && grep -Fqx "$shell_block_end" "$rc_file"; then
+    say "Shell integration is already present: $rc_file"
     return
   fi
 
-  if [ -f "$bashrc" ] && { grep -Fq "$install_dir/shell/dev-harness.bash" "$bashrc" || grep -Fqx "$source_line" "$bashrc"; }; then
-    say "Shell integration is already present: $bashrc"
+  if [ -f "$rc_file" ] && { grep -Fq "$marker" "$rc_file" || grep -Fqx "$source_line" "$rc_file"; }; then
+    say "Shell integration is already present: $rc_file"
     return
   fi
 
-  if [ -f "$bashrc" ] && { grep -Fqx "$shell_block_start" "$bashrc" || grep -Fqx "$shell_block_end" "$bashrc"; }; then
-    warn "An incomplete Dev Harness block exists in $bashrc; it was left unchanged."
+  if [ -f "$rc_file" ] && { grep -Fqx "$shell_block_start" "$rc_file" || grep -Fqx "$shell_block_end" "$rc_file"; }; then
+    warn "An incomplete Dev Harness block exists in $rc_file; it was left unchanged."
     return
   fi
 
   if [ "$dry_run" = true ]; then
-    say "Would add shell integration to: $bashrc"
+    say "Would add shell integration to: $rc_file"
     return
   fi
 
   {
-    [ ! -s "$bashrc" ] || printf '\n'
+    [ ! -s "$rc_file" ] || printf '\n'
     printf '%s\n' "$shell_block_start"
     printf '%s\n' "$source_line"
     printf '%s\n' "$shell_block_end"
-  } >> "$bashrc"
-  say "Added shell integration to: $bashrc"
+  } >> "$rc_file"
+  say "Added shell integration to: $rc_file"
+}
+
+configure_shell_integration() {
+  if should_configure_bashrc; then
+    configure_shell_rc "$bashrc" dev-harness.bash
+  fi
+  if should_configure_zshrc; then
+    configure_shell_rc "$zshrc" dev-harness.zsh
+  fi
 }
 
 show_shell_instruction() {
-  printf '\nTo enable aliases and directory-changing shortcuts, add this line to ~/.bashrc:\n\n'
-  shell_source_line
+  printf '\nTo enable aliases and directory-changing shortcuts, add one of these lines:\n\n'
+  shell_source_line dev-harness.bash
   printf '\n'
+  if should_configure_zshrc; then
+    shell_source_line dev-harness.zsh
+    printf '\n'
+  fi
 }
 
-remove_shell_block() {
-  local start_line end_line middle_line expected_line temp
-  [ -f "$bashrc" ] || return 0
-  start_line="$(grep -nFx "$shell_block_start" "$bashrc" | cut -d: -f1 | head -n 1 || true)"
-  end_line="$(grep -nFx "$shell_block_end" "$bashrc" | cut -d: -f1 | head -n 1 || true)"
+remove_shell_block_from() {
+  local rc_file="$1" shell_file="$2" start_line end_line middle_line expected_line temp marker
+  marker="$install_dir/shell/$shell_file"
+  [ -f "$rc_file" ] || return 0
+  start_line="$(grep -nFx "$shell_block_start" "$rc_file" | cut -d: -f1 | head -n 1 || true)"
+  end_line="$(grep -nFx "$shell_block_end" "$rc_file" | cut -d: -f1 | head -n 1 || true)"
   [ -n "$start_line" ] || return 0
 
   if [ -z "$end_line" ] || [ "$end_line" -le "$start_line" ]; then
-    warn "Managed shell block is incomplete; $bashrc was left unchanged."
+    warn "Managed shell block is incomplete; $rc_file was left unchanged."
     return 0
   fi
 
-  middle_line="$(sed -n "$((start_line + 1))p" "$bashrc")"
-  expected_line="$(shell_source_line)"
+  middle_line="$(sed -n "$((start_line + 1))p" "$rc_file")"
+  expected_line="$(shell_source_line "$shell_file")"
   if [ "$end_line" -ne "$((start_line + 2))" ] || [ "$middle_line" != "$expected_line" ]; then
-    warn "Managed shell block was edited, so $bashrc was left unchanged."
+    if grep -Fq "$marker" "$rc_file"; then
+      warn "Managed shell block was edited, so $rc_file was left unchanged."
+    fi
     return 0
   fi
 
   if [ "$dry_run" = true ]; then
-    say "Would remove managed shell integration from: $bashrc"
+    say "Would remove managed shell integration from: $rc_file"
     return 0
   fi
 
-  temp="$(mktemp "${TMPDIR:-/tmp}/dev-harness-bashrc.XXXXXX")"
-  awk -v start="$start_line" -v end="$end_line" 'NR < start || NR > end' "$bashrc" > "$temp"
-  cp "$temp" "$bashrc"
+  temp="$(mktemp "${TMPDIR:-/tmp}/dev-harness-shellrc.XXXXXX")"
+  awk -v start="$start_line" -v end="$end_line" 'NR < start || NR > end' "$rc_file" > "$temp"
+  cp "$temp" "$rc_file"
   rm -f -- "$temp"
-  say "Removed managed shell integration from: $bashrc"
+  say "Removed managed shell integration from: $rc_file"
+}
+
+remove_shell_block() {
+  remove_shell_block_from "$bashrc" dev-harness.bash
+  remove_shell_block_from "$zshrc" dev-harness.zsh
 }
 
 remove_global_loader() {
@@ -513,7 +550,7 @@ install_config
 install_global_loader
 
 if [ "$configure_shell" = true ]; then
-  configure_bashrc
+  configure_shell_integration
 else
   show_shell_instruction
 fi

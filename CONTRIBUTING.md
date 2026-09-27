@@ -12,7 +12,7 @@ Changes that affect either environment must preserve its documented behavior.
 
 ## Required tools
 
-Install Bash, Task, Git, `fzf`, and `rg` before developing. Install `grepai` only when
+Install Bash, Task, Git, `fzf`, and `rg` before developing. Commands: [docs/required-tools.md](docs/required-tools.md). Install `grepai` only when
 working on semantic search. Use Git Bash on Windows
 when running the Bash test suites. PowerShell is required when changing or
 checking the Windows installer.

@@ -65,6 +65,7 @@ expected_archive_files() {
     LICENSE \
     install.sh \
     install.ps1 \
+    brew-macos.sh \
     Taskfile.global.yml \
     config/dev-harness.env.example \
     demo/Dockerfile \

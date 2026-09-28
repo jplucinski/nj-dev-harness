@@ -46,6 +46,8 @@ Required:
 - `fzf`
 - `rg` (ripgrep)
 
+Install commands for macOS and Windows: [docs/required-tools.md](docs/required-tools.md).
+
 Optional feature dependencies:
 
 - `grepai` and Ollama (needed for `gtask index` / `gtask semantic`)
